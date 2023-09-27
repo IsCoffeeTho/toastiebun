@@ -7,5 +7,9 @@ bun install toastiebun
 ```
 ## Testing
 ```bash
+# Unit Tests
 bun test
+
+# Mock Server @ http://localhost:3000
+bun start
 ```
