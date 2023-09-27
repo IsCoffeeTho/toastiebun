@@ -3,7 +3,7 @@ import toastieBun from ".";
 var viewCount = 0;
 var errorCount = 0;
 
-const server = new toastieBun.server()
+new toastieBun.server()
 	.get("/", (req, res) => {
 		res.send(`Example Server using the ToastieBun Framework\nviews: ${++viewCount}`);
 	})

@@ -1,15 +1,12 @@
+import { beforeAll, expect, mock, test } from "bun:test";
 import toastie from "..";
 
 const mockhost = "127.0.0.1";
 const mockport = Math.floor(Math.random() * 9999) + 1000;
 
+const endpoint = `http://${mockhost}:${mockport}`;
+
 var dynamicCounter = 0;
-
-var alertFunctionsToServerReadiness: (() => void)[] = [];
-
-function onready(fn: () => void) {
-	alertFunctionsToServerReadiness.push(fn);
-}
 
 const mockserver = new toastie.server()
 	.get("/", (req, res) => {
@@ -49,18 +46,20 @@ const mockserver = new toastie.server()
 		res.status(404).send("404");
 	});
 
-function begin() {
+beforeAll(() => {
 	mockserver.listen(mockhost, mockport, () => {
-		alertFunctionsToServerReadiness.forEach((fn:() => void) => {
-			fn();
-		})
+
 	});
-}
+
+	test("Server Hooked?", async () => {
+		expect((await fetch(`${endpoint}`)).ok).toBe(true);
+	});
+});
+
 
 export {
-	onready,
 	mockhost,
 	mockport,
 	mockserver,
-	begin
+	endpoint
 }
