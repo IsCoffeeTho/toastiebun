@@ -1,11 +1,11 @@
 import { BunFile } from "bun";
 import { existsSync } from "fs";
-import { toastiebun } from "./toastiebun";
 import server from "./server";
+import { toastiebun } from "./toastiebun";
 
 const thispkg = require("../package.json");
 
-export default class response {
+export default class response implements toastiebun.response {
 	#httpframe: toastiebun.httpFrame;
 	#sentHeaders: boolean = false;
 	#parent: server;
@@ -40,17 +40,21 @@ export default class response {
 					break;
 			}
 		this.#sentHeaders = true;
+		return true;
 	}
 
-	sendFile(path: string, errorCallback?: (err?: any) => any) {
+	sendFile(path: toastiebun.path, errorCallback?: (err?: any) => any) {
+		if (!toastiebun.pathLike.test(path))
+			throw new TypeError("path is not toastiebun.pathLike");
 		try {
-			var err = new Error("ENOENT");
 			if (!existsSync(path))
-				throw err;
+				throw new Error("ENOENT");
 			var body = Bun.file(path);
-			if (body.size == 0)
-					throw err;
 			this.#httpframe.body = body;
+			if (body.size == 0 && this.#httpframe.status == 200) {
+				this.#httpframe.status = 204;
+				this.#httpframe.body = "";
+			}
 			this.#httpframe.headers["Content-Type"] = body.type;
 			this.#sentHeaders = true;
 		} catch (err) {

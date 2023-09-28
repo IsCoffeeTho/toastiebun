@@ -1,12 +1,12 @@
-import { BunFile } from "bun";
-import { existsSync } from "fs";
+/// <reference path="toastiebun.d.ts" />
+
 import request from "./request";
 import response from "./response";
 import { toastiebun } from "./toastiebun";
 
 const thispkg = require("../package.json");
 
-export default class server {
+export default class server implements toastiebun.server {
 	#routes: toastiebun.handleDescriptor[];
 	#running: boolean;
 	host: string;
@@ -17,78 +17,88 @@ export default class server {
 		this.host = "";
 		this.port = 0;
 	}
-	use(path: toastiebun.path | toastiebun.path[] | server, middleware: server) {
+
+	use(path: string | string[] | toastiebun.server, middleware?: toastiebun.server) {
+		var pathArray = <string[]>[];
 		if (path instanceof server) {
 			middleware = path;
-			path = "*";
+			pathArray = ["*"];
+		} else if (!middleware || !(middleware satisfies toastiebun.server)) {
+			throw new TypeError("Missing middleware for toastiebun.use(path?: string | string[], middleware: server)");
 		}
 		if (typeof path != "object") {
-			path = [path];
+			pathArray = [path];
 		}
-		path.sort((a, b) => { return b.length - a.length; })
-		path.forEach((p) => { this.#addCatch("MIDDLEWARE", p ?? "*", middleware); })
+		pathArray.sort((a, b) => { return b.length - a.length; })
+		pathArray.forEach((p, i) => {
+			if (!toastiebun.URILike.test(p))
+				throw new TypeError(`path[${i}] is not toastiebun.URILike`);
+			this.#addCatch("MIDDLEWARE", p ?? "*", <toastiebun.server>middleware);
+		})
 		return this;
 	}
 
-	get(path: toastiebun.path, fn: toastiebun.handler) {
+	get(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("GET", path, fn);
 		return this;
 	}
 
-	post(path: toastiebun.path, fn: toastiebun.handler) {
+	post(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("POST", path, fn);
 		return this;
 	}
 
-	put(path: toastiebun.path, fn: toastiebun.handler) {
+	put(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("PUT", path, fn);
 		return this;
 	}
 
-	patch(path: toastiebun.path, fn: toastiebun.handler) {
+	patch(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("PATCH", path, fn);
 		return this;
 	}
 
-	delete(path: toastiebun.path, fn: toastiebun.handler) {
+	delete(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("DELETE", path, fn);
 		return this;
 	}
 
-	options(path: toastiebun.path, fn: toastiebun.handler) {
+	options(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("OPTIONS", path, fn);
 		return this;
 	}
 
-	head(path: toastiebun.path, fn: toastiebun.handler) {
+	head(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("HEAD", path, fn);
 		return this;
 	}
 
-	trace(path: toastiebun.path, fn: toastiebun.handler) {
+	trace(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("TRACE", path, fn);
 		return this;
 	}
 
-	connect(path: toastiebun.path, fn: toastiebun.handler) {
+	connect(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("CONNECT", path, fn);
 		return this;
 	}
 
-	all(path: toastiebun.path, fn: toastiebun.handler) {
+	all(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("*", path, fn);
 		return this;
 	}
 
-	#addCatch(method: toastiebun.method, path: toastiebun.path, fn: toastiebun.handler | server) {
+	#addCatch(method: toastiebun.method, path: string, fn: toastiebun.handlerFunction | toastiebun.server) {
+		if (!toastiebun.URILike.test(path))
+			throw new TypeError("path is not toastiebun.URILike");
 		this.#routes.push({
 			method: method,
 			path: path,
-			handle: fn
+			handler: fn
 		});
 	}
 
-	#getRoutes(method: toastiebun.method, path: toastiebun.path) {
+	#getRoutes(method: toastiebun.method, path: string) {
 		return this.#routes.filter((route) => {
 			if (route.method == "MIDDLEWARE")
 				return (path.startsWith(route.path))
@@ -101,7 +111,7 @@ export default class server {
 	}
 
 	// todo: figure out next() system
-	trickleRequest(req: request, res: response, next: () => void) {
+	trickleRequest(req: toastiebun.request, res: toastiebun.response, next: () => void) {
 		var caughtOnce = false;
 		var continueAfterCatch = false;
 		var nextFn = () => {
@@ -113,15 +123,15 @@ export default class server {
 		for (var i = 0; i < methodRoutes.length; i++) {
 			continueAfterCatch = false;
 			caughtOnce = true;
-			if (methodRoutes[i].handle instanceof server) {
+			if (methodRoutes[i].handler instanceof server) {
 				var savedPath = req.path;
 				req.path = req.path.slice(methodRoutes[i].path.length);
 				if (req.path.length == 0)
 					req.path = "/";
-				(<server>(<toastiebun.handleDescriptor>methodRoutes[i]).handle).trickleRequest(req, res, nextFn);
+				(<server><unknown>methodRoutes[i].handler).trickleRequest(req, res, nextFn);
 				req.path = savedPath;
 			} else {
-				(<toastiebun.handler>methodRoutes[i].handle)(req, res, nextFn);
+				(<toastiebun.handlerFunction>methodRoutes[i].handler)(req, res, nextFn);
 			}
 			if (!continueAfterCatch)
 				break;

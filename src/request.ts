@@ -1,9 +1,11 @@
 import server from "./server";
-import { toastiebun } from "./toastiebun";
-
-export default class request {
+/**
+ * @inner
+ */
+export default class request implements toastiebun.request {
 	#parent: server;
 	#method: toastiebun.method;
+	#currentRoute : toastiebun.path[];
 	#text: () => Promise<string>;
 	#json: () => Promise<any>;
 	baseUrl: string;
@@ -29,6 +31,7 @@ export default class request {
 				}
 				this.cookies[key] = value;
 			});
+		this.#currentRoute = [];
 	}
 
 	get app() {
@@ -45,5 +48,9 @@ export default class request {
 
 	get method() {
 		return this.#method;
+	}
+
+	routeTrace() {
+		return this.#currentRoute;
 	}
 }

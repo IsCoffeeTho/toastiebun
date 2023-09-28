@@ -1,7 +1,16 @@
 import toastieBun from ".";
 
-var viewCount = 0;
-var errorCount = 0;
+var _404_count = 0;
+var _host = "127.0.0.1";
+var _port = 3000;
+
+if (process.argv.length > 2) {
+	_host = process.argv[2];
+}
+
+if (process.argv.length > 3) {
+	_port = parseInt(process.argv[3]);
+}
 
 new toastieBun.server()
 	.get("/", (req, res, next) => {
@@ -37,8 +46,8 @@ new toastieBun.server()
 		})
 	)
 	.get("*", (req, res) => {
-		res.status(404).send(`404 File Not Found\ntimes error occured: ${++errorCount}`);
+		res.status(404).send(`404 File Not Found\ntimes error occured: ${++_404_count}`);
 	})
-	.listen("127.0.0.1", 3000, (server) => {
+	.listen(_host, _port, (server) => {
 		console.log(`Hosting server @ ${server.host}:${server.port}`);
 	});
