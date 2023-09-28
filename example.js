@@ -4,17 +4,33 @@ var viewCount = 0;
 var errorCount = 0;
 
 new toastieBun.server()
-	.get("/", (req, res) => {
-		res.send(`Example Server using the ToastieBun Framework\nviews: ${++viewCount}`);
+	.get("/", (req, res, next) => {
+		// this can be a way of error handling
+		const hasServedUser = res.sendFile(`${__dirname}/mockserver/index.html`, () => {
+			next();
+		})
+		if (!hasServedUser)
+			console.log("missing index moving on");
 	})
 	.get("/file", (req, res) => {
-		res.sendFile(`${__dirname}/mockserver/test.txt`, () => {
-			res.status(404).send("404 File Not Found");
+		// this is another way to handle errors
+		res.sendFile(`${__dirname}/mockserver/test.txt`, (err) => {
+			res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
 		});
+	})
+	.get("/empty", (req, res) => {
+		res.sendFile(`${__dirname}/mockserver/emptyFile.txt`, (err) => {
+			res.status(404).send(`404\nThe file exists but is empty\n\nHand Written Error`);
+		});
+	})
+	.get("/long/path", (req, res) => {
+		res.send("This is an example long path route");
 	})
 	.use(["/sub", "/subserver"], new toastieBun.server()
 		.get("/", (req, res) => {
-			res.send("Sub Server")
+			res.sendFile(`${__dirname}/mockserver/subserver.html`, (err) => {
+				res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
+			});
 		})
 		.get("*", (req, res) => {
 			res.status(404).send("404 on subserver")
