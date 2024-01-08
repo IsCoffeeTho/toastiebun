@@ -24,14 +24,10 @@ const mockserver = new toastie.server()
 		});
 	})
 	.get("/test-file", (req, res) => {
-		res.sendFile(`${__dirname}/../mockserver/test.txt`, () => {
-			res.status(404).send("404");
-		});
+		res.sendFile(`${__dirname}/../mockserver/test.txt`, () => { res.status(404).send("404"); });
 	})
 	.get("/missing-file", (req, res) => {
-		res.sendFile(`${__dirname}/../mockserver/doesnt-exist.test`, () => {
-			res.status(404).send("404");
-		});
+		res.sendFile(`${__dirname}/../mockserver/doesnt-exist.test`, () => { res.status(404).send("404"); });
 	})
 	.get("/appliance", (req, res) => {
 		res.status(418).send("Short and Stout");
@@ -48,11 +44,9 @@ const mockserver = new toastie.server()
 
 beforeAll(() => {
 	mockserver.listen(mockhost, mockport, () => {
-
-	});
-
-	test("Server Hooked?", async () => {
-		expect((await fetch(`${endpoint}`)).ok).toBe(true);
+		test("Server Hooked?", async () => {
+			expect((await fetch(`${endpoint}`)).ok).toBe(true);
+		});
 	});
 });
 

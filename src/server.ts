@@ -1,4 +1,4 @@
-/// <reference path="toastiebun.d.ts" />
+/// <reference path="toastiebun.ts" />
 
 import request from "./request";
 import response from "./response";
@@ -31,7 +31,7 @@ export default class server implements toastiebun.server {
 		}
 		pathArray.sort((a, b) => { return b.length - a.length; })
 		pathArray.forEach((p, i) => {
-			if (!toastiebun.URILike.test(p))
+			if (!toastiebun.pathPatternLike.test(p))
 				throw new TypeError(`path[${i}] is not toastiebun.URILike`);
 			this.#addCatch("MIDDLEWARE", p ?? "*", <toastiebun.server>middleware);
 		})
@@ -88,9 +88,9 @@ export default class server implements toastiebun.server {
 		return this;
 	}
 
-	#addCatch(method: toastiebun.method, path: string, fn: toastiebun.handlerFunction | toastiebun.server) {
-		if (!toastiebun.URILike.test(path))
-			throw new TypeError("path is not toastiebun.URILike");
+	#addCatch(method: toastiebun.method, path: toastiebun.pathPattern, fn: toastiebun.handlerFunction | toastiebun.server) {
+		if (!toastiebun.pathPatternLike.test(path))
+			throw new TypeError("path is not toastiebun.pathPatern");
 		this.#routes.push({
 			method: method,
 			path: path,
@@ -110,11 +110,10 @@ export default class server implements toastiebun.server {
 		});
 	}
 
-	// todo: figure out next() system
-	trickleRequest(req: toastiebun.request, res: toastiebun.response, next: () => void) {
+	trickleRequest(req: toastiebun.request, res: toastiebun.response, next: toastiebun.nextFn) {
 		var caughtOnce = false;
 		var continueAfterCatch = false;
-		var nextFn = () => {
+		var nextFn: toastiebun.nextFn = () => {
 			continueAfterCatch = true;
 		};
 		var methodRoutes = this.#getRoutes(<toastiebun.method>req.method, req.path);
@@ -150,8 +149,8 @@ export default class server implements toastiebun.server {
 				port: port,
 				async fetch(req) {
 					var url = new URL(req.url);
-					var constructedRequest = new request(parent, req);
-					var constructedResponse = new response(parent);
+					var constructedResponse = new response(parent, req);
+					var constructedRequest = new request(parent, req, constructedResponse);
 					try {
 						parent.trickleRequest(constructedRequest, constructedResponse, () => { });
 						if (constructedResponse.headerSent)
@@ -166,6 +165,8 @@ export default class server implements toastiebun.server {
 			this.host = s.hostname;
 			this.port = s.port;
 			fn(this);
+			return true;
 		}
+		return false;
 	}
 }

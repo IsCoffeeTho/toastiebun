@@ -1,7 +1,7 @@
 import toastieBun from ".";
 
 var _404_count = 0;
-var _host = "127.0.0.1";
+var _host = "10.0.0.95";
 var _port = 3000;
 
 if (process.argv.length > 2) {
