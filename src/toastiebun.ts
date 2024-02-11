@@ -204,13 +204,10 @@ export namespace toastiebun {
 		 * @see {@link fresh}
 		 */
 		readonly stale: boolean;
-
-		readonly host: string;
 		readonly hostname: string;
 		readonly ip: string;
 		readonly method: method;
 		readonly originalUrl: toastiebun.path;
-		readonly protocol: "http" | "https" | "ws";
 		readonly res: response;
 		readonly params: {
 			[key: string]: string
@@ -225,9 +222,6 @@ export namespace toastiebun {
 		routeTrace: () => string[]
 	}
 
-	/**
-	 * @template TBM - Marked **T**o **B**e **M**odified
-	 */
 	export type cookieOptions = {
 		domain?: string,
 		expires?: Date,
@@ -242,19 +236,15 @@ export namespace toastiebun {
 			"none" | "None"
 	};
 
-	/**
-	 * @template TBM - Marked **T**o **B**e **M**odified
-	 */
 	export interface response {
 		readonly app: server;
-		readonly headersSent: boolean;
+		readonly headerSent: boolean;
 		locals: {
 			[key: string]: string
 		};
 		append: (field: string, value?: string | string[]) => this;
 		cookie: (name: string, value: any, options?: cookieOptions) => this;
 		clearCookie: (name: string, options?: cookieOptions) => this;
-		// sendAsDownload: (path: string, filename?: string, options?: fileOptions, errCallback: (err) => void) => this;
 		markNoCache: () => this;
 		end: () => boolean;
 		get: (field: string) => string | string[] | null;

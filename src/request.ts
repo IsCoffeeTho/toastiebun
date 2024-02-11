@@ -13,10 +13,11 @@ export default class request implements toastiebun.request {
 	#stale: boolean;
 	#fields: { [field: string]: string };
 	#bunReq: Request;
-	protocol: "http" | "https" | "ws";
 	res: toastiebun.response;
 	params: { [key: string]: string; };
 	query: { [key: string]: string; };
+	originalUrl: string;
+	hostname: string;
 	constructor(parent: toastiebun.server, req: Request, res: toastiebun.response) {
 		this.#parent = parent;
 		this.#bunReq = req;
@@ -25,6 +26,9 @@ export default class request implements toastiebun.request {
 		this.#method = <toastiebun.method>this.#bunReq.method;
 		this.#text = this.#bunReq.text;
 		this.#json = this.#bunReq.json;
+		this.params = {};
+		this.query = {};
+		this.res = res;
 		this.cookies = {};
 		var cookieHeader = this.#bunReq.headers.get("Cookie");
 		if (cookieHeader)
@@ -43,14 +47,14 @@ export default class request implements toastiebun.request {
 			this.#stale = true;
 		this.#stale = true;
 		this.#fields = {};
+		var url = new URL(req.url);
+		this.originalUrl = url.toString();
+		this.hostname = url.hostname;
 	}
 
 	get ip() { return this.#bunReq.destination; }
-
 	get app() { return this.#parent; }
-
 	get method() { return this.#method; }
-
 	get fresh() { return !this.#stale; }
 
 	/**
@@ -76,5 +80,9 @@ export default class request implements toastiebun.request {
 
 	json() {
 		return this.#json();
+	}
+
+	routeTrace () {
+		return this.routeStack;
 	}
 }

@@ -35,9 +35,7 @@ export default class response implements toastiebun.response {
 		return this.#parent;
 	}
 
-	get headersSent() {
-		return this.#sentHeaders;
-	}
+	get headerSent() { return this.#sentHeaders; }
 
 	get(field: string) {
 		if (!this.#headers[field])
@@ -178,11 +176,6 @@ export default class response implements toastiebun.response {
 			return false;
 		}
 		return true;
-	}
-
-	sendAsDownload() {
-		console.warn("response.sendAsDownload is experimental, and a beta feature of toastiebun.\nto get rid of this message, either update to a version that has this feature as stable or wait until that update arrives.");
-		return false;
 	}
 
 	type(type: string) {

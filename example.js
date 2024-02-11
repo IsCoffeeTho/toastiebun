@@ -1,7 +1,7 @@
 import toastieBun from ".";
 
 var _404_count = 0;
-var _host = "10.0.0.95";
+var _host = "127.0.0.1";
 var _port = 3000;
 
 if (process.argv.length > 2) {
@@ -35,7 +35,7 @@ new toastieBun.server()
 	.get("/long/path", (req, res) => {
 		res.send("This is an example long path route");
 	})
-	.use(["/sub", "/subserver"], new toastieBun.server()
+	.use("/sub", new toastieBun.server()
 		.get("/", (req, res) => {
 			res.sendFile(`${__dirname}/mockserver/subserver.html`, (err) => {
 				res.status(404).send(`404 File Not Found\nERR: ${err.message}`);

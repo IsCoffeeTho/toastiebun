@@ -20,74 +20,38 @@ export default class server implements toastiebun.server {
 
 	use(path: string | string[] | toastiebun.server, middleware?: toastiebun.server) {
 		var pathArray = <string[]>[];
+
 		if (path instanceof server) {
 			middleware = path;
-			pathArray = ["*"];
+			pathArray = ["/"];
 		} else if (!middleware || !(middleware satisfies toastiebun.server)) {
 			throw new TypeError("Missing middleware for toastiebun.use(path?: string | string[], middleware: server)");
 		}
+
+		pathArray = (<string[]>path); // string | string[]
 		if (typeof path != "object") {
 			pathArray = [path];
 		}
-		pathArray.sort((a, b) => { return b.length - a.length; })
+
+		pathArray.sort((a, b) => { return b.length - a.length; });
 		pathArray.forEach((p, i) => {
 			if (!toastiebun.pathPatternLike.test(p))
 				throw new TypeError(`path[${i}] is not toastiebun.URILike`);
-			this.#addCatch("MIDDLEWARE", p ?? "*", <toastiebun.server>middleware);
+			this.#addCatch("MIDDLEWARE", p ?? "/", <toastiebun.server>middleware);
 		})
 		return this;
 	}
 
-	get(path: string, fn: toastiebun.handlerFunction) {
-		this.#addCatch("GET", path, fn);
-		return this;
-	}
-
-	post(path: string, fn: toastiebun.handlerFunction) {
-		this.#addCatch("POST", path, fn);
-		return this;
-	}
-
-	put(path: string, fn: toastiebun.handlerFunction) {
-		this.#addCatch("PUT", path, fn);
-		return this;
-	}
-
-	patch(path: string, fn: toastiebun.handlerFunction) {
-		this.#addCatch("PATCH", path, fn);
-		return this;
-	}
-
-	delete(path: string, fn: toastiebun.handlerFunction) {
-		this.#addCatch("DELETE", path, fn);
-		return this;
-	}
-
-	options(path: string, fn: toastiebun.handlerFunction) {
-		this.#addCatch("OPTIONS", path, fn);
-		return this;
-	}
-
-	head(path: string, fn: toastiebun.handlerFunction) {
-		this.#addCatch("HEAD", path, fn);
-		return this;
-	}
-
-	trace(path: string, fn: toastiebun.handlerFunction) {
-		this.#addCatch("TRACE", path, fn);
-		return this;
-	}
-
-	connect(path: string, fn: toastiebun.handlerFunction) {
-		this.#addCatch("CONNECT", path, fn);
-		return this;
-	}
-
-	all(path: string, fn: toastiebun.handlerFunction) {
-		this.#addCatch("*", path, fn);
-		return this;
-	}
-
+	all(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("*", path, fn); return this; }
+	get(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("GET", path, fn); return this; }
+	put(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("PUT", path, fn); return this; }
+	post(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("POST", path, fn); return this; }
+	head(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("HEAD", path, fn); return this; }
+	trace(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("TRACE", path, fn); return this; }
+	patch(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("PATCH", path, fn); return this; }
+	delete(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("DELETE", path, fn); return this; }
+	options(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("OPTIONS", path, fn); return this; }
+	connect(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("CONNECT", path, fn); return this; }
 	#addCatch(method: toastiebun.method, path: toastiebun.pathPattern, fn: toastiebun.handlerFunction | toastiebun.server) {
 		if (!toastiebun.pathPatternLike.test(path))
 			throw new TypeError("path is not toastiebun.pathPatern");
@@ -101,7 +65,7 @@ export default class server implements toastiebun.server {
 	#getRoutes(method: toastiebun.method, path: string) {
 		return this.#routes.filter((route) => {
 			if (route.method == "MIDDLEWARE")
-				return (path.startsWith(route.path))
+				return (path == route.path || path.startsWith(`${route.path}/`))
 			if (route.method != "*" && route.method != method)
 				return false;
 			if (route.path.at(-1) == '*')
@@ -164,6 +128,7 @@ export default class server implements toastiebun.server {
 			});
 			this.host = s.hostname;
 			this.port = s.port;
+			console.log(this.#routes);
 			fn(this);
 			return true;
 		}
