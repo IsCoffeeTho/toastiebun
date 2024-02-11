@@ -253,5 +253,6 @@ export namespace toastiebun {
 		status: (code: toastiebun.httpStatus) => this;
 		send: (body: any) => boolean;
 		sendFile: (path: string, errCallback?: (err?: any) => void) => boolean;
+		sendStatic: (path: string, errCallback?: (err?: any) => void) => boolean;
 	}
 }
