@@ -15,7 +15,7 @@ if (process.argv.length > 3) {
 new toastieBun.server()
 	.get("/", (req, res, next) => {
 		// this can be a way of error handling
-		const hasServedUser = res.sendFile(`${__dirname}/mockserver/index.html`, () => {
+		const hasServedUser = res.sendStatic(`${__dirname}/mockserver/index.html`, () => {
 			next();
 		})
 		if (!hasServedUser)

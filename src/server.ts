@@ -128,7 +128,6 @@ export default class server implements toastiebun.server {
 			});
 			this.host = s.hostname;
 			this.port = s.port;
-			console.log(this.#routes);
 			fn(this);
 			return true;
 		}

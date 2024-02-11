@@ -152,6 +152,21 @@ export default class response implements toastiebun.response {
 		return true;
 	}
 
+	sendStatic(path: toastiebun.path, errorCallback?: (err?: any) => any) {
+		this.sendFile(path, errorCallback);
+		var lastModified = new Date((<BunFile>this.#body).lastModified);
+		lastModified.setMilliseconds(0);
+		if (this.#req.headers.has('If-Modified-Since')) {
+			var modifiedSince = new Date((<string>this.#req.headers.get('If-Modified-Since')));
+			if (modifiedSince >= lastModified) {
+				this.#body = null;
+				this.#status = 304;
+			}
+		} else
+			this.#headers["Last-Modified"] = [lastModified.toUTCString()];
+		return this;
+	}
+
 	sendFile(path: toastiebun.path, errorCallback?: (err?: any) => any) {
 		if (this.#sentHeaders)
 			throw response.#InvalidHeaderAccess;
