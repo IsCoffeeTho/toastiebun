@@ -1,7 +1,7 @@
 # ToastieBun
 [**`git`**](https://github.com/IsCoffeeTho/toastieBun) | [**`npm`**](https://www.npmjs.com/package/toastiebun)
 
-ToastieBun is an express like bun based http server framework. 
+ToastieBun is an express like bun based http server framework.
 
 ## Installation
 ```bash

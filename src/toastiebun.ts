@@ -92,7 +92,7 @@ export namespace toastiebun {
 	 * @param {function} next - The callback function to call the next Handler (if any).
 	 * @returns {void}
 	 */
-	export type handlerFunction = (req: request, res: response, next?: nextFn) => void;
+	export type handlerFunction = (req: request, res: response, next: nextFn) => void;
 
 	/**
 	 * HTTP Handler Catch Descriptor

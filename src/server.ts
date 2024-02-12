@@ -104,7 +104,7 @@ export default class server implements toastiebun.server {
 		return caughtOnce;
 	}
 
-	listen(host: string, port: number, fn: (server?: server) => any) {
+	listen(host: string, port: number, fn?: (server: server) => any) {
 		if (!this.#running) {
 			this.#running = true;
 			var parent = this;
@@ -128,7 +128,8 @@ export default class server implements toastiebun.server {
 			});
 			this.host = s.hostname;
 			this.port = s.port;
-			fn(this);
+			if (fn)
+				fn(this);
 			return true;
 		}
 		return false;
