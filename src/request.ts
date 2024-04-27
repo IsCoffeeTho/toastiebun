@@ -18,6 +18,7 @@ export default class request implements toastiebun.request {
 	query: { [key: string]: string; };
 	originalUrl: string;
 	hostname: string;
+	headers : Map<string, string>;
 	constructor(parent: toastiebun.server, req: Request, res: toastiebun.response) {
 		this.#parent = parent;
 		this.#bunReq = req;
@@ -50,6 +51,7 @@ export default class request implements toastiebun.request {
 		var url = new URL(req.url);
 		this.originalUrl = url.toString();
 		this.hostname = url.hostname;
+		this.headers = new Map<string, string>();
 	}
 
 	get ip() { return this.#bunReq.destination; }

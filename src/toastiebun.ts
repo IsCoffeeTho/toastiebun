@@ -1,3 +1,5 @@
+import { Socket } from "net";
+
 /**
  * @see {@link toastiebun.server} 
  */
@@ -71,7 +73,7 @@ export namespace toastiebun {
 	 * to a sub-handler to modify or decorate it as it's being processed.
 	 * @inner
 	 */
-	export type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT" | "*" | "MIDDLEWARE";
+	export type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT" | "*" | "MIDDLEWARE" | "WS";
 
 	/**
 	 * @template TBM - Marked **T**o **B**e **M**odified
@@ -95,6 +97,16 @@ export namespace toastiebun {
 	export type handlerFunction = (req: request, res: response, next: nextFn) => void;
 
 	/**
+	 * WebSocket Handler Function
+	 * 
+	 * A handler function that creates and supplies a websocket to hook on for ws requests.
+	 * 
+	 * @param {toastiebun.websocket} ws - The Websocket to hook.
+	 * @returns {void}
+	 */
+	export type websocketHandler = (ws: websocket) => void;
+
+	/**
 	 * HTTP Handler Catch Descriptor
 	 * 
 	 * A handler descriptor is used to describe a path and a {@link handlerFunction}
@@ -111,7 +123,7 @@ export namespace toastiebun {
 	export type handleDescriptor = {
 		path: pathPattern,
 		method: method,
-		handler: handlerFunction | server
+		handler: handlerFunction | server | websocketHandler
 	};
 
 	/**
@@ -158,9 +170,10 @@ export namespace toastiebun {
 		trace: catchDescriptor<this>;
 		connect: catchDescriptor<this>;
 		all: catchDescriptor<this>;
+		websocket: (path: pathPattern, websocketFunction: (ws: websocket) => any) => this;
 		use: (path: pathPattern | pathPattern[] | server, middleware?: server) => this;
 		trickleRequest: (req: request, res: response, next: nextFn) => boolean;
-		listen: (host: string, port: number, fn: (server?: server) => any) => boolean;
+		listen: (host: string, port: number, fn?: (server: server) => any) => boolean;
 	}
 
 	/**
@@ -216,7 +229,7 @@ export namespace toastiebun {
 			[key: string]: string
 		};
 		path: toastiebun.path;
-		get: (field: string) => string | null;
+		headers: Map<string, string>;
 		text: () => Promise<string>;
 		json: () => Promise<object>;
 		routeTrace: () => string[]
@@ -231,9 +244,9 @@ export namespace toastiebun {
 		secure?: boolean,
 		signed?: boolean,
 		sameSite?: boolean |
-			"strict" | "Strict" |
-			"lax" | "Lax" |
-			"none" | "None"
+		"strict" | "Strict" |
+		"lax" | "Lax" |
+		"none" | "None"
 	};
 
 	export interface response {
@@ -254,5 +267,20 @@ export namespace toastiebun {
 		send: (body: any) => boolean;
 		sendFile: (path: string, errCallback?: (err?: any) => void) => boolean;
 		sendStatic: (path: string, errCallback?: (err?: any) => void) => boolean;
+	}
+
+	interface websocketEvents {
+		readonly "open": {
+			websocket: Socket
+		}
+	};
+
+	type eventHandler<events> = <ev extends keyof events>(eventName:ev, ...args:[events[ev]]) => any;
+
+	export interface websocket {
+		on: eventHandler<websocketEvents>;
+		once(ev: websocketEvents, callback: (...args: any[]) => any): any;
+		emit(ev: websocketEvents, ...args: any[]): any;
+		send(m: string | Buffer | Uint8Array): boolean;
 	}
 }

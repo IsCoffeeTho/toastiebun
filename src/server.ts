@@ -22,7 +22,7 @@ export default class server implements toastiebun.server {
 		var pathArray = <string[]>[];
 
 		if (path instanceof server) {
-			middleware = path;
+			middleware = <toastiebun.server>path;
 			pathArray = ["/"];
 		} else if (!middleware || !(middleware satisfies toastiebun.server)) {
 			throw new TypeError("Missing middleware for toastiebun.use(path?: string | string[], middleware: server)");
@@ -50,9 +50,10 @@ export default class server implements toastiebun.server {
 	trace(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("TRACE", path, fn); return this; }
 	patch(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("PATCH", path, fn); return this; }
 	delete(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("DELETE", path, fn); return this; }
+	websocket(path: string, fn: toastiebun.websocketHandler) { this.#addCatch("WS", path, fn); return this; }
 	options(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("OPTIONS", path, fn); return this; }
 	connect(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("CONNECT", path, fn); return this; }
-	#addCatch(method: toastiebun.method, path: toastiebun.pathPattern, fn: toastiebun.handlerFunction | toastiebun.server) {
+	#addCatch(method: toastiebun.method, path: toastiebun.pathPattern, fn: toastiebun.handlerFunction | toastiebun.server | toastiebun.websocketHandler) {
 		if (!toastiebun.pathPatternLike.test(path))
 			throw new TypeError("path is not toastiebun.pathPatern");
 		this.#routes.push({
@@ -104,7 +105,7 @@ export default class server implements toastiebun.server {
 		return caughtOnce;
 	}
 
-	listen(host: string, port: number, fn?: (server: server) => any) {
+	listen(host: string, port: number, fn?: (server: toastiebun.server) => any) {
 		if (!this.#running) {
 			this.#running = true;
 			var parent = this;

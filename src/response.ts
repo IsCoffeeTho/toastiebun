@@ -16,11 +16,11 @@ export default class response implements toastiebun.response {
 	};
 	#contentType: string | null;
 	#sentHeaders: boolean = false;
-	#parent: server;
+	#parent: toastiebun.server;
 	locals: { [key: string]: string };
 	#cookies: { [key: string]: string };
 	#req: Request;
-	constructor(parent: server, req: Request) {
+	constructor(parent: toastiebun.server, req: Request) {
 		this.#parent = parent;
 		this.#req = req;
 		this.#status = 200;
