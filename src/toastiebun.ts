@@ -1,3 +1,4 @@
+import { Server } from "bun";
 import { Socket } from "net";
 
 /**
@@ -161,6 +162,8 @@ export namespace toastiebun {
 	 * @template TBM - Marked **T**o **B**e **M**odified
 	 */
 	export interface server {
+		host: string,
+		port:number,
 		get: catchDescriptor<this>;
 		post: catchDescriptor<this>;
 		put: catchDescriptor<this>;
@@ -232,7 +235,8 @@ export namespace toastiebun {
 		headers: Map<string, string>;
 		text: () => Promise<string>;
 		json: () => Promise<object>;
-		routeTrace: () => string[]
+		routeTrace: () => string[];
+		upgrade: (serve:Server) => websocket;
 	}
 
 	export type cookieOptions = {
@@ -269,18 +273,26 @@ export namespace toastiebun {
 		sendStatic: (path: string, errCallback?: (err?: any) => void) => boolean;
 	}
 
-	interface websocketEvents {
-		readonly "open": {
-			websocket: Socket
-		}
+	export interface websocketEvents {
+		// no open event, it would never be triggered after hooked
+		"data": [
+			Buffer
+		],
+		"close": [
+			number,
+			Buffer
+		],
+		"error": [
+			Error
+		]
 	};
 
-	type eventHandler<events> = <ev extends keyof events>(eventName:ev, ...args:[events[ev]]) => any;
+	// @ts-ignore // works anyway
+	type eventHandler<events> = <ev extends keyof events>(eventName:ev, fn:((...args:(events[ev])) => any)) => any;
 
 	export interface websocket {
 		on: eventHandler<websocketEvents>;
-		once(ev: websocketEvents, callback: (...args: any[]) => any): any;
-		emit(ev: websocketEvents, ...args: any[]): any;
+		once: eventHandler<websocketEvents>;
 		send(m: string | Buffer | Uint8Array): boolean;
 	}
 }

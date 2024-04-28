@@ -237,6 +237,10 @@ export default class response implements toastiebun.response {
 	get asBunResponse() {
 		if (this.#body satisfies BunFile && (<BunFile>this.#body).size == 0)
 			this.#body = "";
+
+		if (this.#contentType != null)
+			this.#headers["Content-Type"] = [this.#contentType];
+		
 		return new Response(this.#body, {
 			status: this.#status,
 			headers: {

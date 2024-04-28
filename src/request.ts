@@ -1,5 +1,7 @@
 /// <reference path="toastiebun.ts" />
+import { Server } from "bun";
 import { toastiebun } from "./toastiebun";
+import websocket from "./websocket";
 
 export default class request implements toastiebun.request {
 	#parent: toastiebun.server;
@@ -86,5 +88,15 @@ export default class request implements toastiebun.request {
 
 	routeTrace () {
 		return this.routeStack;
+	}
+
+	upgrade(serverToUpgradeOn:Server) {
+		var websock = new websocket();
+		serverToUpgradeOn.upgrade(this.#bunReq, {
+			data: {
+				ws: websock
+			}
+		});
+		return websock;
 	}
 }

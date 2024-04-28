@@ -12,6 +12,11 @@ const mockserver = new toastie.server()
 	.get("/", (req, res) => {
 		res.send("TEST SERVER");
 	})
+	.websocket("/echo-ws", (ws) => {
+		ws.on("data", (data) => {
+			ws.send(data);
+		})
+	})
 	.get("/test-route", (req, res) => {
 		res.send("Success for Test Route");
 	})
@@ -42,8 +47,8 @@ const mockserver = new toastie.server()
 		res.status(404).send("404");
 	});
 
-beforeAll(() => {
-	mockserver.listen(mockhost, mockport, () => {
+beforeAll(async () => {
+	mockserver.listen(mockhost, mockport, async () => {
 		test("Server Hooked?", async () => {
 			expect((await fetch(`${endpoint}`)).ok).toBe(true);
 		});

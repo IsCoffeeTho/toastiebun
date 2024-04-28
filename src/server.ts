@@ -1,19 +1,23 @@
 /// <reference path="toastiebun.ts" />
 
+import { Server } from "bun";
 import request from "./request";
 import response from "./response";
 import { toastiebun } from "./toastiebun";
+import websocket from "./websocket";
 
 const thispkg = require("../package.json");
 
 export default class server implements toastiebun.server {
 	#routes: toastiebun.handleDescriptor[];
 	#running: boolean;
+	#s: Server | null;
 	host: string;
 	port: number;
 	constructor() {
 		this.#routes = [];
 		this.#running = false;
+		this.#s = null;
 		this.host = "";
 		this.port = 0;
 	}
@@ -71,6 +75,8 @@ export default class server implements toastiebun.server {
 				return false;
 			if (route.path.at(-1) == '*')
 				return (path.startsWith(route.path.slice(0, -1)));
+			if (method == "WS" && route.method != "GET") // websockets only occur on GET method
+				return false;
 			return (route.path == path);
 		});
 	}
@@ -87,7 +93,11 @@ export default class server implements toastiebun.server {
 		for (var i = 0; i < methodRoutes.length; i++) {
 			continueAfterCatch = false;
 			caughtOnce = true;
-			if (methodRoutes[i].handler instanceof server) {
+			if (req.headers.has("Upgrade")) {
+				if (methodRoutes[i].method != "WS")
+					continue;
+				(<toastiebun.websocketHandler>methodRoutes[i].handler)(req.upgrade(<Server>this.#s));
+			} else if (methodRoutes[i].handler instanceof server) {
 				var savedPath = req.path;
 				req.path = req.path.slice(methodRoutes[i].path.length);
 				if (req.path.length == 0)
@@ -109,7 +119,7 @@ export default class server implements toastiebun.server {
 		if (!this.#running) {
 			this.#running = true;
 			var parent = this;
-			var s = Bun.serve({
+			this.#s = Bun.serve({
 				hostname: host,
 				port: port,
 				async fetch(req) {
@@ -125,10 +135,32 @@ export default class server implements toastiebun.server {
 						console.error(err);
 						return new Response(`500 Internal Server Error\nUncaught ${err.name}: ${err.message}`, { status: 500, headers: { "Content-Type": "text/plain", "X-Powered-By": `ToastieBun v${thispkg.version}` } });
 					}
+				},
+				websocket: {
+					message(ws, data) {
+						try {
+							(<{ ws: websocket }>ws.data).ws.emit("data", data);
+						}
+						catch (err) {
+							(<{ ws: websocket }>ws.data).ws.emit("error", err);
+						}
+					},
+					open(ws) {
+						// TODO: implement
+						console.log(ws);
+					},
+					close(ws, code, reason) {
+						try {
+							(<{ ws: websocket }>ws.data).ws.emit("close", code, reason);
+						}
+						catch (err) {
+							(<{ ws: websocket }>ws.data).ws.emit("error", err);
+						}
+					}
 				}
 			});
-			this.host = s.hostname;
-			this.port = s.port;
+			this.host = this.#s.hostname;
+			this.port = this.#s.port;
 			if (fn)
 				fn(this);
 			return true;

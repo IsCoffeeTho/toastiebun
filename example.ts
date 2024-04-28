@@ -22,7 +22,7 @@ new toastieBun.server()
 			console.log("missing index moving on");
 	})
 	.websocket("/echo-ws", (ws) => {
-		ws.on("data", (data) => {
+		ws.on("data", (data: Buffer) => {
 			ws.send(data);
 		})
 	})
