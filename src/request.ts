@@ -11,7 +11,7 @@ export default class request implements toastiebun.request {
 	baseUrl: string;
 	path: string;
 	cookies: { [key: string]: (string | boolean) };
-	routeStack: string[];
+	routeStack: toastiebun.handleDescriptor[];
 	#stale: boolean;
 	#fields: { [field: string]: string };
 	#bunReq: Request;
@@ -20,7 +20,7 @@ export default class request implements toastiebun.request {
 	query: { [key: string]: string; };
 	originalUrl: string;
 	hostname: string;
-	headers : Map<string, string>;
+	headers: Map<string, string>;
 	constructor(parent: toastiebun.server, req: Request, res: toastiebun.response) {
 		this.#parent = parent;
 		this.#bunReq = req;
@@ -29,8 +29,8 @@ export default class request implements toastiebun.request {
 		this.#method = <toastiebun.method>this.#bunReq.method;
 		this.#text = this.#bunReq.text;
 		this.#json = this.#bunReq.json;
-		this.params = {};
-		this.query = {};
+		this.params = {}; // TODO: implement
+		this.query = {}; // TODO: implement
 		this.res = res;
 		this.cookies = {};
 		var cookieHeader = this.#bunReq.headers.get("Cookie");
@@ -81,20 +81,21 @@ export default class request implements toastiebun.request {
 		return this.#text();
 	}
 
-
 	json() {
 		return this.#json();
 	}
 
-	routeTrace () {
-		return this.routeStack;
+	routeTrace() {
+		return this.routeStack.map(r => r.path);
 	}
 
-	upgrade(serverToUpgradeOn:Server) {
+	upgrade(serverToUpgradeOn: Server, handler: toastiebun.websocketHandler) {
 		var websock = new websocket();
 		serverToUpgradeOn.upgrade(this.#bunReq, {
 			data: {
-				ws: websock
+				ws: websock,
+				req: this,
+				handle: handler
 			}
 		});
 		return websock;

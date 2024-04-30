@@ -163,7 +163,7 @@ export namespace toastiebun {
 	 */
 	export interface server {
 		host: string,
-		port:number,
+		port: number,
 		get: catchDescriptor<this>;
 		post: catchDescriptor<this>;
 		put: catchDescriptor<this>;
@@ -190,11 +190,26 @@ export namespace toastiebun {
 		 */
 		readonly app: server;
 
-		//
+		/**
+		 * If the server has decided to delegate handling of a path to a middleware,
+		 * the parent path that caused the handle to capture will be available here.
+		 * 
+		 * @see {@link server.use}
+		 */
 		readonly baseUrl: toastiebun.path;
 
-		readonly routeStack: toastiebun.path[];
+		/**
+		 * holds the previous request handlers that has modified or handled the current
+		 * request prioir.
+		 * 
+		 * @see {@link server.get}
+		 * @see {@link server.use}
+		 */
+		readonly routeStack: toastiebun.handleDescriptor[];
 
+		/**
+		 * Magic Cookies that are sent with the client
+		 */
 		readonly cookies: { [key: string]: string | boolean; };
 
 		/**
@@ -220,23 +235,65 @@ export namespace toastiebun {
 		 * @see {@link fresh}
 		 */
 		readonly stale: boolean;
+
+		/**
+		 * Provided hostname of the request. Not garunteed to be accurate, but is provided using the
+		 * `Host` header in the HTTP request
+		 */
 		readonly hostname: string;
+
+		/**
+		 * Internet Protocal Address of the request.
+		 */
 		readonly ip: string;
+
+		/**
+		 * Current HTTP Method of request. 
+		 */
 		readonly method: method;
 		readonly originalUrl: toastiebun.path;
+		
+		/**
+		 * The linked Response of the request.
+		 * 
+		 * @see {@link response} 
+		 */
 		readonly res: response;
+
+		/**
+		 * Search parameters of the request (if any)
+		 * 
+		 * @example
+		 * '/users/search?name=john'
+		 * // would result in a 'params' with:
+		 * `{"name":"john"}`
+		 */
 		readonly params: {
 			[key: string]: string
 		};
+
+		/** @template TBM */
 		readonly query: {
 			[key: string]: string
 		};
+
+		/**
+		 * Provides the current path that caught by request
+		 * 
+		 * @see {@link server.use}
+		 */
 		path: toastiebun.path;
+
+		/**
+		 * HTTP Headers of the request 
+		 * 
+		 * @see {@link https://datatracker.ietf.org/doc/html/rfc2616#autoid-33}
+		 */
 		headers: Map<string, string>;
 		text: () => Promise<string>;
 		json: () => Promise<object>;
 		routeTrace: () => string[];
-		upgrade: (serve:Server) => websocket;
+		upgrade: (serve: Server, handler: websocketHandler) => websocket;
 	}
 
 	export type cookieOptions = {
@@ -274,21 +331,13 @@ export namespace toastiebun {
 	}
 
 	export interface websocketEvents {
-		// no open event, it would never be triggered after hooked
-		"data": [
-			Buffer
-		],
-		"close": [
-			number,
-			Buffer
-		],
-		"error": [
-			Error
-		]
+		"data": [Buffer],
+		"close": [number, string],
+		"error": [Error]
 	};
 
 	// @ts-ignore // works anyway
-	type eventHandler<events> = <ev extends keyof events>(eventName:ev, fn:((...args:(events[ev])) => any)) => any;
+	type eventHandler<events> = <ev extends keyof events>(eventName: ev, fn: ((...args: (events[ev])) => any)) => any;
 
 	export interface websocket {
 		on: eventHandler<websocketEvents>;

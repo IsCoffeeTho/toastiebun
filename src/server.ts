@@ -6,7 +6,8 @@ import response from "./response";
 import { toastiebun } from "./toastiebun";
 import websocket from "./websocket";
 
-const thispkg = require("../package.json");
+// @ts-ignore // just imports version number
+import thispkg from "../package.json";
 
 export default class server implements toastiebun.server {
 	#routes: toastiebun.handleDescriptor[];
@@ -91,12 +92,13 @@ export default class server implements toastiebun.server {
 		if (methodRoutes.length == 0)
 			return false;
 		for (var i = 0; i < methodRoutes.length; i++) {
+			req.routeStack.push(methodRoutes[i]);
 			continueAfterCatch = false;
 			caughtOnce = true;
 			if (req.headers.has("Upgrade")) {
 				if (methodRoutes[i].method != "WS")
 					continue;
-				(<toastiebun.websocketHandler>methodRoutes[i].handler)(req.upgrade(<Server>this.#s));
+				req.upgrade(<Server>this.#s, <toastiebun.websocketHandler>methodRoutes[i].handler);
 			} else if (methodRoutes[i].handler instanceof server) {
 				var savedPath = req.path;
 				req.path = req.path.slice(methodRoutes[i].path.length);
@@ -146,8 +148,7 @@ export default class server implements toastiebun.server {
 						}
 					},
 					open(ws) {
-						// TODO: implement
-						console.log(ws);
+						(<{ handle: toastiebun.websocketHandler }>ws.data).handle((<{ ws: websocket }>ws.data).ws);
 					},
 					close(ws, code, reason) {
 						try {
