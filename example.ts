@@ -5,7 +5,13 @@ var _host = "127.0.0.1";
 var _port = 3000;
 
 if (process.argv.length > 2) {
-	_host = process.argv[2];
+	var colonSperator = process.argv[2].indexOf(":");
+	if (colonSperator == -1)
+		_host = process.argv[2];
+	else {
+		_host = process.argv[2].slice(0, colonSperator);
+		_port = parseInt(process.argv[2].slice(colonSperator + 1));
+	}
 }
 
 if (process.argv.length > 3) {

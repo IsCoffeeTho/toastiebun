@@ -21,6 +21,7 @@ export default class request implements toastiebun.request {
 	originalUrl: string;
 	hostname: string;
 	headers: Map<string, string>;
+	data: any;
 	constructor(parent: toastiebun.server, req: Request, res: toastiebun.response) {
 		this.#parent = parent;
 		this.#bunReq = req;

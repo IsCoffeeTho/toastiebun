@@ -202,7 +202,7 @@ export namespace toastiebun {
 		 * holds the previous request handlers that has modified or handled the current
 		 * request prioir.
 		 * 
-		 * @see {@link server.get}
+		 * @see {@link server.all}
 		 * @see {@link server.use}
 		 */
 		readonly routeStack: toastiebun.handleDescriptor[];
@@ -290,10 +290,27 @@ export namespace toastiebun {
 		 * @see {@link https://datatracker.ietf.org/doc/html/rfc2616#autoid-33}
 		 */
 		headers: Map<string, string>;
+
+		/**
+		 * Returns text as a promise
+		 * 
+		 * @example
+		 * const body = await req.text()
+		 * console.log(body);
+		 */
 		text: () => Promise<string>;
+
+		/**
+		 * Returns json as a promise
+		 * 
+		 * @example
+		 * const body = await req.json()
+		 * console.log(json);
+		 */
 		json: () => Promise<object>;
 		routeTrace: () => string[];
 		upgrade: (serve: Server, handler: websocketHandler) => websocket;
+		data: any;
 	}
 
 	export type cookieOptions = {
@@ -338,6 +355,7 @@ export namespace toastiebun {
 
 	// @ts-ignore // works anyway
 	type eventHandler<events> = <ev extends keyof events>(eventName: ev, fn: ((...args: (events[ev])) => any)) => any;
+
 
 	export interface websocket {
 		on: eventHandler<websocketEvents>;

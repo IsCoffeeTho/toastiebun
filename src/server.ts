@@ -85,9 +85,7 @@ export default class server implements toastiebun.server {
 	trickleRequest(req: toastiebun.request, res: toastiebun.response, next: toastiebun.nextFn) {
 		var caughtOnce = false;
 		var continueAfterCatch = false;
-		var nextFn: toastiebun.nextFn = () => {
-			continueAfterCatch = true;
-		};
+		var nextFn: toastiebun.nextFn = () => { continueAfterCatch = true; };
 		var methodRoutes = this.#getRoutes(<toastiebun.method>req.method, req.path);
 		if (methodRoutes.length == 0)
 			return false;
