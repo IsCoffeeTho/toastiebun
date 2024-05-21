@@ -28,16 +28,15 @@ export default class server implements toastiebun.server {
 
 		if (path instanceof server) {
 			middleware = <toastiebun.server>path;
-			pathArray = ["/"];
+			path = "/";
 		} else if (!middleware || !(middleware satisfies toastiebun.server)) {
 			throw new TypeError("Missing middleware for toastiebun.use(path?: string | string[], middleware: server)");
 		}
 
 		pathArray = (<string[]>path); // string | string[]
-		if (typeof path != "object") {
-			pathArray = [path];
+		if (typeof path == "string") {
+			pathArray = [ path ];
 		}
-
 		pathArray.sort((a, b) => { return b.length - a.length; });
 		pathArray.forEach((p, i) => {
 			if (!toastiebun.pathPatternLike.test(p))
@@ -70,8 +69,8 @@ export default class server implements toastiebun.server {
 
 	#getRoutes(method: toastiebun.method, path: string) {
 		return this.#routes.filter((route) => {
-			if (route.method == "MIDDLEWARE")
-				return (path == route.path || path.startsWith(`${route.path}/`))
+			if (route.method == "MIDDLEWARE") 
+				return (path == route.path || path.startsWith(route.path.at(-1) != '/' ? `${route.path}/` : route.path));
 			if (route.method != "*" && route.method != method)
 				return false;
 			if (route.path.at(-1) == '*')
@@ -99,9 +98,7 @@ export default class server implements toastiebun.server {
 				req.upgrade(<Server>this.#s, <toastiebun.websocketHandler>methodRoutes[i].handler);
 			} else if (methodRoutes[i].handler instanceof server) {
 				var savedPath = req.path;
-				req.path = req.path.slice(methodRoutes[i].path.length);
-				if (req.path.length == 0)
-					req.path = "/";
+				req.path = "/" + req.path.slice(methodRoutes[i].path.length);
 				(<server><unknown>methodRoutes[i].handler).trickleRequest(req, res, nextFn);
 				req.path = savedPath;
 			} else {
