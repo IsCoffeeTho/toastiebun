@@ -264,18 +264,23 @@ export namespace toastiebun {
 		 * Search parameters of the request (if any)
 		 * 
 		 * @example
-		 * '/users/search?name=john'
+		 * '/users/:id' -> '/users/a0b1c2d3e4f5g6h7i8j9'
 		 * // would result in a 'params' with:
-		 * `{"name":"john"}`
+		 * `{"id":"a0b1c2d3e4f5g6h7i8j9"}`
 		 */
 		readonly params: {
 			[key: string]: string
 		};
 
-		/** @template TBM */
-		readonly query: {
-			[key: string]: string
-		};
+		/**
+		 * Search query of the request (if any)
+		 * 
+		 * @example
+		 * '/users/search?name=john'
+		 * // would result in a 'query' with:
+		 * `{"name":"john"}`
+		 */
+		readonly query: URLSearchParams;
 
 		/**
 		 * Provides the current path that caught by request

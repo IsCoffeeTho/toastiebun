@@ -46,6 +46,9 @@ new toastieBun.server()
 	.get("/long/path", (req, res) => {
 		res.send("This is an example long path route");
 	})
+	.get("/say/:word", (req, res) => {
+		res.send(req.params.word)
+	})
 	.use("/sub", new toastieBun.server()
 		.get("/", (req, res) => {
 			res.sendFile(`${__dirname}/mockserver/subserver.html`, (err) => {

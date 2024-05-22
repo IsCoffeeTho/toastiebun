@@ -17,7 +17,7 @@ export default class request implements toastiebun.request {
 	#bunReq: Request;
 	res: toastiebun.response;
 	params: { [key: string]: string; };
-	query: { [key: string]: string; };
+	query: URLSearchParams;
 	originalUrl: string;
 	hostname: string;
 	headers: Map<string, string>;
@@ -26,12 +26,13 @@ export default class request implements toastiebun.request {
 		this.#parent = parent;
 		this.#bunReq = req;
 		this.baseUrl = this.#bunReq.url;
-		this.path = new URL(this.#bunReq.url).pathname;
+		const urlobj = new URL(this.#bunReq.url)
+		this.path = urlobj.pathname;
 		this.#method = <toastiebun.method>this.#bunReq.method;
 		this.#text = this.#bunReq.text;
 		this.#json = this.#bunReq.json;
 		this.params = {}; // TODO: implement
-		this.query = {}; // TODO: implement
+		this.query = urlobj.searchParams; // TODO: implement
 		this.res = res;
 		this.cookies = {};
 		var cookieHeader = this.#bunReq.headers.get("Cookie");

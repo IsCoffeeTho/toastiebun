@@ -43,6 +43,9 @@ const mockserver = new toastie.server()
 	.get("/decrement", (req, res) => {
 		res.send(`${--dynamicCounter}`);
 	})
+	.get("/say/:word", (req, res) => {
+		res.send(req.params.word)
+	})
 	.get("*", (req, res) => {
 		res.status(404).send("404");
 	});

@@ -3,14 +3,21 @@ import { endpoint } from "./mockserver";
 import { WebSocket } from "ws";
 
 test("Text", async () => {
-expect(await (await fetch(`${endpoint}/`)).text())
-	.toBe("TEST SERVER");
-expect(await (await fetch(`${endpoint}/test-route`)).text())
-	.toBe("Success for Test Route");
-expect(await (await fetch(`${endpoint}/another-test-route`)).text())
-	.toBe("Success for Test Route again");
-expect(await (await fetch(`${endpoint}/test-file`)).text())
-	.toBe("This text is from a file");
+	expect(await (await fetch(`${endpoint}/`)).text())
+		.toBe("TEST SERVER");
+	expect(await (await fetch(`${endpoint}/test-route`)).text())
+		.toBe("Success for Test Route");
+	expect(await (await fetch(`${endpoint}/another-test-route`)).text())
+		.toBe("Success for Test Route again");
+	expect(await (await fetch(`${endpoint}/test-file`)).text())
+		.toBe("This text is from a file");
+});
+
+test("Parameters", async () => {
+	expect(await (await fetch(`${endpoint}/say/test`)).text())
+		.toBe("test");
+	expect(await (await fetch(`${endpoint}/say/example`)).text())
+		.toBe("example");
 });
 
 test("JSON", async () => {
@@ -40,7 +47,7 @@ test("Websocket", async () => {
 		}
 		websocket.send("hi");
 		expect(await awaitMessage()).toBe("hi");
-		var randomNumber = (Math.random()*(10**6)).toString();
+		var randomNumber = (Math.random() * (10 ** 6)).toString();
 		websocket.send(randomNumber);
 		expect(await awaitMessage()).toBe(randomNumber);
 	};

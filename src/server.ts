@@ -35,7 +35,7 @@ export default class server implements toastiebun.server {
 
 		pathArray = (<string[]>path); // string | string[]
 		if (typeof path == "string") {
-			pathArray = [ path ];
+			pathArray = [path];
 		}
 		pathArray.sort((a, b) => { return b.length - a.length; });
 		pathArray.forEach((p, i) => {
@@ -69,14 +69,28 @@ export default class server implements toastiebun.server {
 
 	#getRoutes(method: toastiebun.method, path: string) {
 		return this.#routes.filter((route) => {
-			if (route.method == "MIDDLEWARE") 
+			if (route.method == "MIDDLEWARE")
 				return (path == route.path || path.startsWith(route.path.at(-1) != '/' ? `${route.path}/` : route.path));
 			if (route.method != "*" && route.method != method)
 				return false;
 			if (route.path.at(-1) == '*')
 				return (path.startsWith(route.path.slice(0, -1)));
-			if (method == "WS" && route.method != "GET") // websockets only occur on GET method
+			if (method == "WS" && route.method != "GET")
 				return false;
+			if (route.path.indexOf(":") != -1) {
+				var master = route.path.split("/");
+				var candidate = path.split("/");
+				if (master.length != candidate.length)
+					return false;
+				for (var idx in master) {
+					var key = master[idx];
+					if (key.startsWith(":"))
+						continue;
+					if (key != candidate[idx])
+						return false;
+				}
+				return true;
+			}
 			return (route.path == path);
 		});
 	}
@@ -89,6 +103,18 @@ export default class server implements toastiebun.server {
 		if (methodRoutes.length == 0)
 			return false;
 		for (var i = 0; i < methodRoutes.length; i++) {
+			if (methodRoutes[i].path.indexOf(":") != -1) {
+				var master = methodRoutes[i].path.split("/");
+				var candidate = req.path.split("/");
+				if (master.length != candidate.length)
+					return false;
+				for (var idx in master) {
+					var key = master[idx];
+					if (!key.startsWith(":"))
+						continue;
+					req.params[key.slice(1)] = candidate[idx];
+				}
+			}
 			req.routeStack.push(methodRoutes[i]);
 			continueAfterCatch = false;
 			caughtOnce = true;
