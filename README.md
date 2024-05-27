@@ -1,5 +1,5 @@
 # ToastieBun
-[**`git`**](https://github.com/IsCoffeeTho/toastieBun) | [**`npm`**](https://www.npmjs.com/package/toastiebun)
+[**`git`**](https://github.com/IsCoffeeTho/toastiebun) | [**`npm`**](https://www.npmjs.com/package/toastiebun)
 
 ToastieBun is an express like bun based http server framework.
 
