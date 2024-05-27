@@ -124,7 +124,9 @@ export default class server implements toastiebun.server {
 				req.upgrade(<Server>this.#s, <toastiebun.websocketHandler>methodRoutes[i].handler);
 			} else if (methodRoutes[i].handler instanceof server) {
 				var savedPath = req.path;
-				req.path = "/" + req.path.slice(methodRoutes[i].path.length);
+				req.path = '/' + req.path.slice(methodRoutes[i].path.length);
+				if (!req.path.startsWith('/'))
+					req.path = '/' + req.path;
 				(<server><unknown>methodRoutes[i].handler).trickleRequest(req, res, nextFn);
 				req.path = savedPath;
 			} else {

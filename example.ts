@@ -55,7 +55,7 @@ new toastieBun.server()
 				res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
 			});
 		})
-		.get("*", (req, res) => {
+		.get("/*", (req, res) => {
 			res.status(404).send("404 on subserver")
 		})
 	)
