@@ -1,4 +1,4 @@
-import { Server } from "bun";
+import { BunFile, Server } from "bun";
 import { Socket } from "net";
 
 /**
@@ -143,7 +143,14 @@ export namespace toastiebun {
 	 * @template TBM - Marked **T**o **B**e **M**odified
 	 * @inner
 	 */
-	export type httpStatus = number | bigint;
+	export type httpStatus = 100 | 101 | 102 | 103 |
+		200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 226 |
+		300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308 |
+		400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 |
+		410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 421 |
+		422 | 423 | 424 | 425 | 426 | 428 | 429 | 431 | 451 |
+		500 | 501 | 502 | 503 | 504 | 505 | 506 | 507 | 508 | 510 |
+		511;
 
 	/**
 	 * @template TBM - Marked **T**o **B**e **M**odified
@@ -155,11 +162,18 @@ export namespace toastiebun {
 	 * @template TBM - Marked **T**o **B**e **M**odified
 	 */
 	export type serverOptions = {
-
+		tls?: {
+			key: BunFile,
+			cert: BunFile
+		}
 	};
 
 	/**
-	 * @template TBM - Marked **T**o **B**e **M**odified
+	 * 
+	 * @see {@link toastiebun.serverOptions}
+	 * @example
+	 * const app = new toastiebun.server({
+	 * })
 	 */
 	export interface server {
 		host: string,
@@ -210,7 +224,7 @@ export namespace toastiebun {
 		/**
 		 * Magic Cookies that are sent with the client
 		 */
-		readonly cookies: { [key: string]: string | boolean; };
+		readonly cookies: Map<string, string | boolean>;
 
 		/**
 		 * Represents whether the clients cache should or shouldn't be updated
@@ -252,7 +266,7 @@ export namespace toastiebun {
 		 */
 		readonly method: method;
 		readonly originalUrl: toastiebun.path;
-		
+
 		/**
 		 * The linked Response of the request.
 		 * 
@@ -294,7 +308,7 @@ export namespace toastiebun {
 		 * 
 		 * @see {@link https://datatracker.ietf.org/doc/html/rfc2616#autoid-33}
 		 */
-		headers: Map<string, string>;
+		headers: Headers;
 
 		/**
 		 * Returns text as a promise

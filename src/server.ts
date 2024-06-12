@@ -1,9 +1,9 @@
-/// <reference path="toastiebun.ts" />
+/// <reference path="toastiebun.d.ts" />
 
 import { Server } from "bun";
 import request from "./request";
 import response from "./response";
-import { toastiebun } from "./toastiebun";
+import { toastiebun } from "./toastiebun.d";
 import websocket from "./websocket";
 
 // @ts-ignore // just imports version number
@@ -15,7 +15,9 @@ export default class server implements toastiebun.server {
 	#s: Server | null;
 	host: string;
 	port: number;
-	constructor() {
+	#opts?: toastiebun.serverOptions;
+	constructor(opt?: toastiebun.serverOptions) {
+		this.#opts = opt;
 		this.#routes = [];
 		this.#running = false;
 		this.#s = null;
@@ -144,7 +146,21 @@ export default class server implements toastiebun.server {
 		if (!this.#running) {
 			this.#running = true;
 			var parent = this;
+			var tls = this.#opts?.tls;
+
+			// default favicon
+			if (this.#getRoutes("GET", "/favicon.ico").length > 0) {
+				this.#routes.unshift({
+					method: "GET",
+					path: "/favicon.ico",
+					handler: (req, res) => {
+						res.sendFile(`${__dirname}/../assets/toastiebun.ico`);
+					}
+				});
+			}
+
 			this.#s = Bun.serve({
+				tls,
 				hostname: host,
 				port: port,
 				async fetch(req) {

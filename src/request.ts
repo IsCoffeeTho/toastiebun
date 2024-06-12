@@ -1,4 +1,4 @@
-/// <reference path="toastiebun.ts" />
+/// <reference path="toastiebun.d.ts" />
 import { Server } from "bun";
 import { toastiebun } from "./toastiebun";
 import websocket from "./websocket";
@@ -10,7 +10,7 @@ export default class request implements toastiebun.request {
 	#json: () => Promise<any>;
 	baseUrl: string;
 	path: string;
-	cookies: { [key: string]: (string | boolean) };
+	cookies: Map<string, string | boolean>;
 	routeStack: toastiebun.handleDescriptor[];
 	#stale: boolean;
 	#fields: { [field: string]: string };
@@ -20,7 +20,6 @@ export default class request implements toastiebun.request {
 	query: URLSearchParams;
 	originalUrl: string;
 	hostname: string;
-	headers: Map<string, string>;
 	data: any;
 	constructor(parent: toastiebun.server, req: Request, res: toastiebun.response) {
 		this.#parent = parent;
@@ -32,10 +31,11 @@ export default class request implements toastiebun.request {
 		this.#text = this.#bunReq.text;
 		this.#json = this.#bunReq.json;
 		this.params = {}; // TODO: implement
-		this.query = urlobj.searchParams; // TODO: implement
+		this.query = urlobj.searchParams;
 		this.res = res;
-		this.cookies = {};
+		this.cookies = new Map<string, string | boolean>();
 		var cookieHeader = this.#bunReq.headers.get("Cookie");
+		// console.log(cookieHeader);
 		if (cookieHeader)
 			cookieHeader.split(';').forEach((cookie) => {
 				var key = cookie;
@@ -45,7 +45,7 @@ export default class request implements toastiebun.request {
 					key = cookie.slice(0, equals);
 					value = cookie.slice(equals + 1);
 				}
-				this.cookies[key] = value;
+				this.cookies.set(key, value);
 			});
 		this.routeStack = [];
 		if (this.get("Cache-Control") == 'no-cache')
@@ -55,8 +55,9 @@ export default class request implements toastiebun.request {
 		var url = new URL(req.url);
 		this.originalUrl = url.toString();
 		this.hostname = url.hostname;
-		this.headers = new Map<string, string>();
 	}
+
+	get headers() { return this.#bunReq.headers }
 
 	get ip() { return this.#bunReq.destination; }
 	get app() { return this.#parent; }

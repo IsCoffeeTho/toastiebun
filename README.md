@@ -1,7 +1,10 @@
 # ToastieBun
+
 [**`git`**](https://github.com/IsCoffeeTho/toastiebun) | [**`npm`**](https://www.npmjs.com/package/toastiebun)
 
 ToastieBun is an express like bun based http server framework.
+
+<img src="./assets/toastiebun.svg" height="300px" alt="Toastie (The Cat)">
 
 ## Installation
 ```bash
@@ -13,5 +16,5 @@ bun install toastiebun
 bun test
 
 # Mock Server @ http://localhost:3000
-bun start
+bun start :: 3000
 ```
