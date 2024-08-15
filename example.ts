@@ -19,6 +19,12 @@ if (process.argv.length > 3) {
 }
 
 new toastieBun.server()
+	.get("/fail", (req, res) => {
+		// this is another way to handle errors
+		res.sendStatic(`${__dirname}/mockserver/`, (err) => {
+			res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
+		});
+	})
 	.get("/", (req, res, next) => {
 		// this can be a way of error handling
 		const hasServedUser = res.sendStatic(`${__dirname}/mockserver/index.html`, () => {
