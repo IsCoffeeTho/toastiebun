@@ -4,7 +4,7 @@
 
 ToastieBun is an express like bun based http server framework.
 
-<img src="./assets/toastiebun.svg" height="300px" alt="Toastie (The Cat)">
+<img src="https://raw.githubusercontent.com/IsCoffeeTho/toastiebun/v0.4.3/assets/toastiebun.svg" height="300px" alt="Toastie (The Cat)">
 
 ## Installation
 ```bash

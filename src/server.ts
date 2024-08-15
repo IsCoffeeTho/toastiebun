@@ -146,7 +146,7 @@ export default class server implements toastiebun.server {
 		if (!this.#running) {
 			this.#running = true;
 			var parent = this;
-			var tls = this.#opts?.tls;
+			var tls = this.#opts?.tls ?? {};
 
 			// default favicon
 			if (this.#getRoutes("GET", "/favicon.ico").length > 0) {
