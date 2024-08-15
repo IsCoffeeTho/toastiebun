@@ -1,5 +1,5 @@
 import { BunFile } from "bun";
-import { existsSync } from "fs";
+import { existsSync, statSync } from "fs";
 import server from "./server";
 import { toastiebun } from "./toastiebun";
 
@@ -154,6 +154,8 @@ export default class response implements toastiebun.response {
 
 	sendStatic(path: toastiebun.path, errorCallback?: (err?: any) => any) {
 		var retval = this.sendFile(path, errorCallback);
+		if (!retval)
+			return false;
 		var lastModified = new Date((<BunFile>this.#body).lastModified);
 		lastModified.setMilliseconds(0);
 		if (this.#req.headers.has('If-Modified-Since')) {
@@ -168,16 +170,19 @@ export default class response implements toastiebun.response {
 	}
 
 	sendFile(path: toastiebun.path, errorCallback?: (err?: any) => any) {
-		if (this.#sentHeaders)
-			throw response.#InvalidHeaderAccess;
-		if (!toastiebun.pathLike.test(path))
-			throw new TypeError("path is not toastiebun.pathLike");
 		try {
+			if (this.#sentHeaders)
+				throw response.#InvalidHeaderAccess;
+			if (!toastiebun.pathLike.test(path))
+				throw new TypeError("path is not toastiebun.pathLike");
 			if (!existsSync(path))
 				throw new Error("ENOENT");
+			var stat = statSync(path);
+			if (!stat.isFile() && !stat.isFIFO())
+				throw new Error("File must be regular or FIFO");
 			var body = Bun.file(path);
 			this.#body = body;
-			if (body.size == 0 && this.#status == 200) {
+			if (body.size == 0 && Math.floor((<number>this.#status) / 100) == 2) {
 				this.#status = 204;
 				this.#body = "";
 			}
@@ -240,7 +245,7 @@ export default class response implements toastiebun.response {
 
 		if (this.#contentType != null)
 			this.#headers["Content-Type"] = [this.#contentType];
-		
+
 		return new Response(this.#body, {
 			status: this.#status,
 			headers: {
