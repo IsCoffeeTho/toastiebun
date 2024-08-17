@@ -12,6 +12,12 @@ const mockserver = new toastie.server()
 	.get("/", (req, res) => {
 		res.send("TEST SERVER");
 	})
+	.get("/async", async (req, res) => {
+		await new Promise((res, rej) => {
+			setTimeout(res, 1000);
+		})
+		res.send("waited 1 sec before responding");
+	})
 	.websocket("/echo-ws", (ws) => {
 		ws.on("data", (data) => {
 			ws.send(data);
