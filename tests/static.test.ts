@@ -22,10 +22,10 @@ test("Parameters", async () => {
 
 test("JSON", async () => {
 	var jsonfetch = await fetch(`${endpoint}/json-test`);
-	expect(await (jsonfetch).headers.get("Content-Type"))
+	expect((jsonfetch).headers.get("Content-Type"))
 		.toBe("application/json");
 
-	var jsontest = await (jsonfetch).json()
+	var jsontest = <any>(await (jsonfetch).json());
 	expect(jsontest)
 		.toHaveProperty("test");
 	expect(jsontest["test"])
@@ -51,4 +51,9 @@ test("Websocket", async () => {
 		websocket.send(randomNumber);
 		expect(await awaitMessage()).toBe(randomNumber);
 	};
+});
+
+test("async", async () => {
+	expect((await fetch(`${endpoint}/async`)).status)
+		.toBe(200);
 });

@@ -1,7 +1,7 @@
 import { BunFile } from "bun";
 import { existsSync, statSync } from "fs";
 import server from "./server";
-import { toastiebun } from "./toastiebun";
+import { toastiebun } from "./toastiebun.d";
 
 const thispkg = require("../package.json");
 

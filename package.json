@@ -8,7 +8,7 @@
     "bun-types": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.5.4"
   },
   "description": "ToastieBun is an express like bun based http server framework.",
   "keywords": [

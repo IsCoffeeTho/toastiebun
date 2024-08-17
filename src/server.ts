@@ -97,7 +97,7 @@ export default class server implements toastiebun.server {
 		});
 	}
 
-	trickleRequest(req: toastiebun.request, res: toastiebun.response, next: toastiebun.nextFn) {
+	async trickleRequest(req: toastiebun.request, res: toastiebun.response, next: toastiebun.nextFn) {
 		var caughtOnce = false;
 		var continueAfterCatch = false;
 		var nextFn: toastiebun.nextFn = () => { continueAfterCatch = true; };
@@ -129,10 +129,10 @@ export default class server implements toastiebun.server {
 				req.path = req.path.slice(methodRoutes[i].path.length);
 				if (!req.path.startsWith('/'))
 					req.path = '/' + req.path;
-				(<server><unknown>methodRoutes[i].handler).trickleRequest(req, res, nextFn);
+				await (<server><unknown>methodRoutes[i].handler).trickleRequest(req, res, nextFn);
 				req.path = savedPath;
 			} else {
-				(<toastiebun.handlerFunction>methodRoutes[i].handler)(req, res, nextFn);
+				await (<toastiebun.handlerFunction>methodRoutes[i].handler)(req, res, nextFn);
 			}
 			if (!continueAfterCatch)
 				break;
@@ -168,7 +168,7 @@ export default class server implements toastiebun.server {
 					var constructedResponse = new response(parent, req);
 					var constructedRequest = new request(parent, req, constructedResponse);
 					try {
-						parent.trickleRequest(constructedRequest, constructedResponse, () => { });
+						await parent.trickleRequest(constructedRequest, constructedResponse, () => { });
 						if (constructedResponse.headerSent)
 							return constructedResponse.asBunResponse;
 						return new Response(`Cannot ${req.method} ${url.pathname}`, { status: 405, headers: { "Content-Type": "text/plain", "X-Powered-By": `ToastieBun v${thispkg.version}` } });

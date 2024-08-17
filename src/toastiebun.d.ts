@@ -1,5 +1,6 @@
 import { BunFile, Server } from "bun";
 import { Socket } from "net";
+import { Headers } from "fetch";
 
 /**
  * @see {@link toastiebun.server} 
@@ -93,9 +94,9 @@ export namespace toastiebun {
 	 * @param {request} req - The HTTP request object.
 	 * @param {response} res - The HTTP response object to modify.
 	 * @param {function} next - The callback function to call the next Handler (if any).
-	 * @returns {void}
+	 * @returns {any}
 	 */
-	export type handlerFunction = (req: request, res: response, next: nextFn) => void;
+	export type handlerFunction = (req: request, res: response, next: nextFn) => any;
 
 	/**
 	 * WebSocket Handler Function
@@ -189,7 +190,7 @@ export namespace toastiebun {
 		all: catchDescriptor<this>;
 		websocket: (path: pathPattern, websocketFunction: (ws: websocket) => any) => this;
 		use: (path: pathPattern | pathPattern[] | server, middleware?: server) => this;
-		trickleRequest: (req: request, res: response, next: nextFn) => boolean;
+		trickleRequest: (req: request, res: response, next: nextFn) => Promise<boolean>;
 		listen: (host: string, port: number, fn?: (server: server) => any) => boolean;
 	}
 

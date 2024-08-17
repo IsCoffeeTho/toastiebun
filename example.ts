@@ -25,6 +25,12 @@ new toastieBun.server()
 			res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
 		});
 	})
+	.get("/async", async (req, res) => {
+		await new Promise((res, rej) => {
+			setTimeout(res, 1000);
+		})
+		res.send("waited 1 sec before responding");
+	})
 	.get("/", (req, res, next) => {
 		// this can be a way of error handling
 		const hasServedUser = res.sendStatic(`${__dirname}/mockserver/index.html`, () => {
