@@ -60,6 +60,9 @@ const mockserver = new toastie.server()
 		res.clearCookie(req.params.name)
 			.send(`cleared ${req.params.name}`);
 	})
+	.post("/post", async (req, res) => {
+		res.send(await req.text());
+	})
 	.get("*", (req, res) => {
 		res.status(404).send("404");
 	});

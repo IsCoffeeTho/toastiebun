@@ -6,8 +6,6 @@ import websocket from "./websocket";
 export default class request implements toastiebun.request {
 	#parent: toastiebun.server;
 	#method: toastiebun.method;
-	#text: () => Promise<string>;
-	#json: () => Promise<any>;
 	baseUrl: string;
 	path: string;
 	cookies: Map<string, string | boolean>;
@@ -28,8 +26,6 @@ export default class request implements toastiebun.request {
 		const urlobj = new URL(this.#bunReq.url)
 		this.path = urlobj.pathname;
 		this.#method = <toastiebun.method>this.#bunReq.method;
-		this.#text = this.#bunReq.text;
-		this.#json = this.#bunReq.json;
 		this.params = {}; // TODO: implement
 		this.query = urlobj.searchParams;
 		this.res = res;
@@ -80,12 +76,12 @@ export default class request implements toastiebun.request {
 		return this.#bunReq.headers.get(field);
 	}
 
-	text() {
-		return this.#text();
+	async text() {
+		return await this.#bunReq.text();
 	}
 
-	json() {
-		return this.#json();
+	async json() {
+		return await this.#bunReq.json();
 	}
 
 	routeTrace() {

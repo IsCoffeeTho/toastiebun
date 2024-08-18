@@ -327,7 +327,7 @@ export namespace toastiebun {
 		 * const body = await req.json()
 		 * console.log(json);
 		 */
-		json: () => Promise<object>;
+		json: () => Promise<unknown>;
 		routeTrace: () => string[];
 		upgrade: (serve: Server, handler: websocketHandler) => websocket;
 		data: any;
