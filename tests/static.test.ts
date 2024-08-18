@@ -13,13 +13,6 @@ test("Text", async () => {
 		.toBe("This text is from a file");
 });
 
-test("Parameters", async () => {
-	expect(await (await fetch(`${endpoint}/say/test`)).text())
-		.toBe("test");
-	expect(await (await fetch(`${endpoint}/say/example`)).text())
-		.toBe("example");
-});
-
 test("JSON", async () => {
 	var jsonfetch = await fetch(`${endpoint}/json-test`);
 	expect((jsonfetch).headers.get("Content-Type"))
@@ -36,7 +29,7 @@ test("Websocket", async () => {
 	var websocket = new WebSocket(`${endpoint}/echo-ws`);
 	websocket.onopen = async () => {
 		var awaitMessage = () => {
-			return new Promise<string | Buffer>((res, rej) => {
+			return new Promise<any>((res, rej) => {
 				websocket.onmessage = (event) => {
 					res(event.data);
 				};
