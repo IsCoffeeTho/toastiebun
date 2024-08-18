@@ -52,6 +52,14 @@ const mockserver = new toastie.server()
 	.get("/say/:word", (req, res) => {
 		res.send(req.params.word)
 	})
+	.get("/cookie/:name/:word", (req, res) => {
+		res.cookie(req.params.name, req.params.word)
+			.send(`set ${req.params.name}: ${req.params.word}`);
+	})
+	.get("/clear-cookie/:name/", (req, res) => {
+		res.clearCookie(req.params.name)
+			.send(`cleared ${req.params.name}`);
+	})
 	.get("*", (req, res) => {
 		res.status(404).send("404");
 	});
