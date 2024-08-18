@@ -23,5 +23,11 @@ test("Cookies", async () => {
 		.toEqual(["test=test"]);
 	expect((await fetch(`${endpoint}/clear-cookie/test`)).headers.getSetCookie())
 		.toEqual([]); // fetch wont let me test the exact functionality but oh well
+});
 
+test("POST", async () => {
+	expect(await (await fetch(`${endpoint}/post`, {
+		method: "POST",
+		body: "Test Data"
+	})).text()).toBe("Test Data");
 });
