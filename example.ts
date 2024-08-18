@@ -44,6 +44,12 @@ new toastieBun.server()
 			ws.send(data);
 		})
 	})
+	.get("/cookie", (req, res) => {
+		res.cookie("test","cookie").send("Set a Cookie!");
+	})
+	.get("/clear-cookie", (req, res) => {
+		res.clearCookie("test").send("Cleared a Cookie!");
+	})
 	.get("/file", (req, res) => {
 		// this is another way to handle errors
 		res.sendFile(`${__dirname}/mockserver/test.txt`, (err) => {

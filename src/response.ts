@@ -62,7 +62,7 @@ export default class response implements toastiebun.response {
 			throw response.#InvalidHeaderAccess;
 		if (!toastiebun.cookieNameLike.test(name))
 			throw new SyntaxError("name has invalid characters");
-		this.#cookies[name] = `"${value}"`;
+		this.#cookies[name] = `${value}`;
 		if (!options)
 			return this;
 		if (options.domain)
@@ -246,10 +246,20 @@ export default class response implements toastiebun.response {
 		if (this.#contentType != null)
 			this.#headers["Content-Type"] = [this.#contentType];
 
+		var cookieHeaders: string[] = [];
+
+		for (var cookie in this.#cookies) {
+			var value = this.#cookies[cookie];
+			cookieHeaders.push(`${cookie}=${value}`);
+		}
+
 		return new Response(this.#body, {
 			status: this.#status,
 			headers: {
 				...this.#headers,
+				...(cookieHeaders.length > 0 ? {
+					'Set-Cookie': cookieHeaders
+				} : {}),
 				"X-Powered-By": `ToastieBun v${thispkg.version}`
 			}
 		});
