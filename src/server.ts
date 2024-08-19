@@ -119,19 +119,23 @@ export default class server implements toastiebun.server {
 			}
 			req.routeStack.push(methodRoutes[i]);
 			continueAfterCatch = false;
-			caughtOnce = true;
 			if (req.headers.has("Upgrade")) {
 				if (methodRoutes[i].method != "WS")
 					continue;
+				caughtOnce = true;
 				req.upgrade(<Server>this.#s, <toastiebun.websocketHandler>methodRoutes[i].handler);
 			} else if (methodRoutes[i].handler instanceof server) {
 				var savedPath = req.path;
 				req.path = req.path.slice(methodRoutes[i].path.length);
 				if (!req.path.startsWith('/'))
 					req.path = '/' + req.path;
-				await (<server><unknown>methodRoutes[i].handler).trickleRequest(req, res, nextFn);
+				if (await (<server><unknown>methodRoutes[i].handler).trickleRequest(req, res, nextFn))
+					caughtOnce = true;
+				else
+					continueAfterCatch = true;
 				req.path = savedPath;
 			} else {
+				caughtOnce = true;
 				await (<toastiebun.handlerFunction>methodRoutes[i].handler)(req, res, nextFn);
 			}
 			if (!continueAfterCatch)
