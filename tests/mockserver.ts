@@ -8,6 +8,8 @@ const endpoint = `http://${mockhost}:${mockport}`;
 
 var dynamicCounter = 0;
 
+const middleware = new toastie.server();
+
 const mockserver = new toastie.server()
 	.get("/", (req, res) => {
 		res.send("TEST SERVER");
@@ -63,6 +65,7 @@ const mockserver = new toastie.server()
 	.post("/post", async (req, res) => {
 		res.send(await req.text());
 	})
+	.use(middleware)
 	.get("*", (req, res) => {
 		res.status(404).send("404");
 	});
