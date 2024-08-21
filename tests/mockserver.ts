@@ -5,6 +5,7 @@ const mockhost = "127.0.0.1";
 const mockport = Math.floor(Math.random() * 9999) + 1000;
 
 const endpoint = `http://${mockhost}:${mockport}`;
+const wsendpoint = `ws://${mockhost}:${mockport}`;
 
 var dynamicCounter = 0;
 
@@ -16,9 +17,9 @@ const mockserver = new toastie.server()
 	})
 	.get("/async", async (req, res) => {
 		await new Promise((res, rej) => {
-			setTimeout(res, 1000);
+			setTimeout(res, 50);
 		})
-		res.send("waited 1 sec before responding");
+		res.send("waited 50ms before responding");
 	})
 	.websocket("/echo-ws", (ws) => {
 		ws.on("data", (data) => {
