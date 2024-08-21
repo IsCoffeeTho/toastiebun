@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { endpoint } from "./mockserver";
+import WebSocket from "ws";
 
 test("Dynamic Content", async () => {
 	expect(await (await fetch(`${endpoint}/increment`)).text())
@@ -30,4 +31,15 @@ test("POST", async () => {
 		method: "POST",
 		body: "Test Data"
 	})).text()).toBe("Test Data");
+});
+
+test("WebSocket", async () => {
+	var socket = new WebSocket(`${endpoint}/echo-ws`);
+	expect(socket).toBeInstanceOf(WebSocket);
+	await new Promise((res, rej) => {
+		socket.once("open", () => { res(0); });
+		socket.once("error", (err) => { rej(err); });
+		socket.once("close", (c, r) => { rej(r.toString()); });
+	});
+	expect(socket.readyState).toBe(WebSocket.OPEN);
 });
