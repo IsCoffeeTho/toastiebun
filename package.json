@@ -1,27 +1,28 @@
 {
-  "name": "toastiebun",
-  "version": "0.4.9",
-  "author": "iscoffeetho <iscoffeetho@gmail.com> (https://github.com/IsCoffeeTho)",
-  "main": "index.ts",
-  "module": "index.ts",
-  "devDependencies": {
-    "bun-types": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.5.4"
-  },
-  "description": "ToastieBun is an express like bun based http server framework.",
-  "keywords": [
-    "backend",
-    "http",
-    "https",
-    "server",
-    "web"
-  ],
-  "license": "ISC",
-  "scripts": {
-    "test": "bun test",
-    "start": "bun run example.ts"
-  },
-  "type": "module"
+	"name": "toastiebun",
+	"version": "0.4.9",
+	"author": "iscoffeetho <iscoffeetho@gmail.com> (https://github.com/IsCoffeeTho)",
+	"main": "index.ts",
+	"module": "index.ts",
+	"devDependencies": {
+		"bun-types": "latest",
+		"ws": "^8.18.0"
+	},
+	"peerDependencies": {
+		"typescript": "^5.5.4"
+	},
+	"description": "ToastieBun is an express like bun based http server framework.",
+	"keywords": [
+		"backend",
+		"http",
+		"https",
+		"server",
+		"web"
+	],
+	"license": "ISC",
+	"scripts": {
+		"test": "bun test",
+		"start": "bun run example.ts"
+	},
+	"type": "module"
 }
