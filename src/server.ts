@@ -1,6 +1,6 @@
 /// <reference path="toastiebun.d.ts" />
 
-import { Server } from "bun";
+import { Server, ServerWebSocket } from "bun";
 import request from "./request";
 import response from "./response";
 import { toastiebun } from "./toastiebun.d";
@@ -73,12 +73,13 @@ export default class server implements toastiebun.server {
 		return this.#routes.filter((route) => {
 			if (route.method == "MIDDLEWARE")
 				return (path == route.path || path.startsWith(route.path.at(-1) != '/' ? `${route.path}/` : route.path));
-			if (route.method != "*" && route.method != method)
+			if (route.method == "WS") {
+				if (method != "GET")
+					return false;
+			} else if (route.method != "*" && route.method != method)
 				return false;
 			if (route.path.at(-1) == '*')
 				return (path.startsWith(route.path.slice(0, -1)));
-			if (method == "WS" && route.method != "GET")
-				return false;
 			if (route.path.indexOf(":") != -1) {
 				var master = route.path.split("/");
 				var candidate = path.split("/");
@@ -183,22 +184,28 @@ export default class server implements toastiebun.server {
 				},
 				websocket: {
 					message(ws, data) {
+						var tws = (<{ ws: websocket }>ws.data).ws;
 						try {
-							(<{ ws: websocket }>ws.data).ws.emit("data", data);
+							tws.emit("data", data);
 						}
 						catch (err) {
-							(<{ ws: websocket }>ws.data).ws.emit("error", err);
+							tws.emit("error", err);
 						}
 					},
 					open(ws) {
-						(<{ handle: toastiebun.websocketHandler }>ws.data).handle((<{ ws: websocket }>ws.data).ws);
+						var handle = (<{ handle: toastiebun.websocketHandler }>ws.data).handle;
+						var tws = (<{ ws: websocket }>ws.data).ws;
+						tws.baseWS = <ServerWebSocket<unknown>>ws;
+						handle(tws);
 					},
 					close(ws, code, reason) {
+						var tws = (<{ ws: websocket }>ws.data).ws;
 						try {
-							(<{ ws: websocket }>ws.data).ws.emit("close", code, reason);
+							tws.emit("close", code, reason);
 						}
 						catch (err) {
-							(<{ ws: websocket }>ws.data).ws.emit("error", err);
+							if (!tws.emit("error", err))
+								throw err;
 						}
 					}
 				}
