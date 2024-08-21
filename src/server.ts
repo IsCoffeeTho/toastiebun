@@ -189,7 +189,8 @@ export default class server implements toastiebun.server {
 							tws.emit("data", data);
 						}
 						catch (err) {
-							tws.emit("error", err);
+							if (!tws.emit("error", err))
+								throw err;
 						}
 					},
 					open(ws) {
