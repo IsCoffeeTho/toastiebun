@@ -1,14 +1,8 @@
 name: Publish Wiki
 
-on:
-  release:
-    types: [published]
-  workflow_dispatch:
-    inputs:
-      reason:
-        description: 'Provide a reason to manually compile wiki'
-        type: string
-        required: true
+on: push
+  # release:
+  #   types: [published]
 
 concurrency:
   group: publish-wiki
@@ -23,11 +17,13 @@ jobs:
     name: Update wiki
     steps:
       - uses: actions/checkout@master
-      - name: Typedoc Wiki
-        uses: TypeStrong/typedoc-action@v1
+        name: Checkout
+      - uses: TypeStrong/typedoc-action@v1
+        name: TypeDoc Gen
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - uses: OrlovM/Wiki-Action@v1
+        name: Wiki Push
         with:
           path: "docs"
           token: ${{ secrets.GITHUB_TOKEN }}
