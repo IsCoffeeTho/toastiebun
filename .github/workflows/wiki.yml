@@ -1,10 +1,8 @@
 name: Publish wiki
 
 on:
-  push:
-    paths:
-      - wiki/**
-      - .github/workflows/wiki.yml
+  release:
+    types: [published]
 
 concurrency:
   group: publish-wiki
@@ -17,8 +15,13 @@ jobs:
   update-wiki:
     runs-on: ubuntu-latest
     name: Update wiki
-    steps:
-    - uses: OrlovM/Wiki-Action@v1
-      with:
-        path: 'wiki'
-        token: ${{ secrets.GITHUB_TOKEN }}
+    steps:  
+      - uses: actions/checkout@master
+      - name: Typedoc Wiki
+        uses: TypeStrong/typedoc-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: OrlovM/Wiki-Action@v1
+        with:
+          path: "docs"
+          token: ${{ secrets.GITHUB_TOKEN }}

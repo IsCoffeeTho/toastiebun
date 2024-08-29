@@ -1,14 +1,19 @@
 {
-	"out": "./wiki",
 	"plugin": [
 		"typedoc-plugin-markdown",
-		"typedoc-github-wiki-theme"
+		"typedoc-github-wiki-theme",
+		"typedoc-plugin-merge-modules"
 	],
+	"out": "./wiki",
 	"entryPoints": [
-		"./src/toastiebun.d.ts"
+		"./src/*.ts",
 	],
-	"entryFileName": "Home.md",
-	"hidePageHeader": true,
+	"projectDocuments": [
+		"docs/**/*.md"
+	],
+	"entryPointStrategy": "expand",
+	"hidePageHeader": false,
 	"flattenOutputFiles": true,
-	"sidebar": {}
+	"mergeModulesRenameDefaults": true,
+	"mergeModulesMergeMode": "project",
 }

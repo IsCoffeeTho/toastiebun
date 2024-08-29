@@ -21,5 +21,10 @@
 		"types": [
 			"bun-types"
 		]
-	}
+	},
+	"include": [
+		"./index.ts",
+		"./src/**/*.ts",
+		"./package.json"
+	]
 }
