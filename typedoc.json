@@ -1,0 +1,14 @@
+{
+	"out": "./wiki",
+	"plugin": [
+		"typedoc-plugin-markdown",
+		"typedoc-github-wiki-theme"
+	],
+	"entryPoints": [
+		"./src/toastiebun.d.ts"
+	],
+	"entryFileName": "Home.md",
+	"hidePageHeader": true,
+	"flattenOutputFiles": true,
+	"sidebar": {}
+}
