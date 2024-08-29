@@ -1,8 +1,7 @@
 import { EventEmitter } from "stream";
-import { toastiebun } from "./toastiebun";
 import { ServerWebSocket } from "bun";
 
-export default class websocket implements toastiebun.websocket {
+export default class websocket {
 	#ev: EventEmitter;
 	#ws: ServerWebSocket<unknown> | null;
 	constructor() {
