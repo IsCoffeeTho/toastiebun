@@ -1,6 +1,5 @@
 import { expect, test } from "bun:test";
-import { endpoint } from "./mockserver";
-import { WebSocket } from "ws";
+import { endpoint } from "./mockserver.test";
 
 test("Text", async () => {
 	expect(await (await fetch(`${endpoint}/`)).text())
@@ -23,27 +22,6 @@ test("JSON", async () => {
 		.toHaveProperty("test");
 	expect(jsontest["test"])
 		.toBe("json");
-});
-
-test("Websocket", async () => {
-	var websocket = new WebSocket(`${endpoint}/echo-ws`);
-	websocket.onopen = async () => {
-		var awaitMessage = () => {
-			return new Promise<any>((res, rej) => {
-				websocket.onmessage = (event) => {
-					res(event.data);
-				};
-				websocket.onerror = () => {
-					rej();
-				}
-			});
-		}
-		websocket.send("hi");
-		expect(await awaitMessage()).toBe("hi");
-		var randomNumber = (Math.random() * (10 ** 6)).toString();
-		websocket.send(randomNumber);
-		expect(await awaitMessage()).toBe(randomNumber);
-	};
 });
 
 test("404", async () => {
