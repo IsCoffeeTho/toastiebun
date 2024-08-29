@@ -24,5 +24,5 @@ jobs:
       - uses: Andrew-Chen-Wang/github-wiki-action@v4
         name: Wiki Push
         with:
-          path: "docs"
+          path: "./wiki"
           token: ${{ secrets.GITHUB_TOKEN }}
