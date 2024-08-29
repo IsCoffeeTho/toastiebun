@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
         name: Checkout
-      - uses: erikyo/typedoc-action@v1
+      - uses: erikyo/tsdoc-action@v1
         name: TypeDoc Gen
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
