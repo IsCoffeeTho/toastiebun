@@ -4,8 +4,11 @@ on:
   release:
     types: [published]
   workflow_dispatch:
-
-
+    inputs:
+      reason:
+        description: 'Provide a reason to manually compile wiki'
+        type: string
+        required: true
 
 concurrency:
   group: publish-wiki
@@ -18,7 +21,7 @@ jobs:
   update-wiki:
     runs-on: ubuntu-latest
     name: Update wiki
-    steps:  
+    steps:
       - uses: actions/checkout@master
       - name: Typedoc Wiki
         uses: TypeStrong/typedoc-action@v1
