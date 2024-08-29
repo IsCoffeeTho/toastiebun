@@ -2,9 +2,6 @@ import { BunFile, Server } from "bun";
 import { Socket } from "net";
 import { Headers } from "fetch";
 
-/**
- * @see {@link toastiebun.server} 
- */
 export namespace toastiebun {
 
 	/**
@@ -14,17 +11,18 @@ export namespace toastiebun {
 	 * file paths, including characters commonly found in paths such as letters,
 	 * numbers, '/', '+', '-', '_', '.', and URL-encoded characters like `%20`.
 	 *
-	 * @constant
+	 * @internal
 	 * @type {RegExp}
+	 * @see {@link path}
 	 */
 	export const pathLike: RegExp = /^([a-zA-Z0-9]|[\/+-_.]|\%[0-9a-fA-F][0-9a-fA-F])+$/;
-
 	/**
 	 * Strings resembling file paths.
 	 *
 	 * This type can be used to identify file paths, including characters
 	 * commonly found in paths such as letters, numbers, '/', '+', '-', '_',
 	 * '.', and URL-encoded characters like `%20`.
+	 * @see {@link pathLike}
 	 */
 	export type path = string;
 
@@ -41,7 +39,6 @@ export namespace toastiebun {
 	 * such as letters, numbers, '/', '+', '-', '_', '.', URL-encoded characters like '%20',
 	 * and the '*' character, which serves as an optional wildcard to match the ends of strings.
 	 *
-	 * @constant
 	 * @type {RegExp}
 	 */
 	export const pathPatternLike: RegExp = /^(([a-zA-Z0-9]|[\/+-_.]|\%[0-9a-fA-F][0-9a-fA-F])+\*{0,1}|\*)$/;
@@ -73,7 +70,7 @@ export namespace toastiebun {
 	 * - `"*"`: Represents a wildcard that encompasses all HTTP methods.
 	 * - `"MIDDLEWARE"`: Represents a custom value for middleware handling, where a request is sent
 	 * to a sub-handler to modify or decorate it as it's being processed.
-	 * @inner
+	 * @internal
 	 */
 	export type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT" | "*" | "MIDDLEWARE" | "WS";
 
@@ -120,7 +117,7 @@ export namespace toastiebun {
 	/**
 	 * @see {@link catchDescriptor}
 	 * @see {@link server}
-	 * @inner
+	 * @internal
 	 */
 	export type handleDescriptor = {
 		path: pathPattern,
@@ -130,7 +127,7 @@ export namespace toastiebun {
 
 	/**
 	 * @template TBM - Marked **T**o **B**e **M**odified
-	 * @inner
+	 * @internal
 	 */
 	export type httpFrame = {
 		status: number,
@@ -142,7 +139,7 @@ export namespace toastiebun {
 
 	/**
 	 * @template TBM - Marked **T**o **B**e **M**odified
-	 * @inner
+	 * @internal
 	 */
 	export type httpStatus = 100 | 101 | 102 | 103 |
 		200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 226 |
@@ -155,7 +152,7 @@ export namespace toastiebun {
 
 	/**
 	 * @template TBM - Marked **T**o **B**e **M**odified
-	 * @inner
+	 * @internal
 	 */
 	export type httpBody = any;
 
@@ -195,7 +192,8 @@ export namespace toastiebun {
 	}
 
 	/**
-	 * @template TBM - Marked **T**o **B**e **M**odified
+	 * 
+	 * 
 	 */
 	export interface request {
 
@@ -214,7 +212,7 @@ export namespace toastiebun {
 		readonly baseUrl: toastiebun.path;
 
 		/**
-		 * holds the previous request handlers that has modified or handled the current
+		 * Holds the previous request handlers that has modified or handled the current
 		 * request prioir.
 		 * 
 		 * @see {@link server.all}
@@ -223,7 +221,9 @@ export namespace toastiebun {
 		readonly routeStack: toastiebun.handleDescriptor[];
 
 		/**
-		 * Magic Cookies that are sent with the client
+		 * Magic Cookies that are sent with the client.
+		 * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cookie}
+		 * @see {@link https://en.wikipedia.org/wiki/Magic_cookie}
 		 */
 		readonly cookies: Map<string, string | boolean>;
 
@@ -259,6 +259,7 @@ export namespace toastiebun {
 
 		/**
 		 * Internet Protocal Address of the request.
+		 * 
 		 */
 		readonly ip: string;
 
@@ -270,7 +271,6 @@ export namespace toastiebun {
 
 		/**
 		 * The linked Response of the request.
-		 * 
 		 * @see {@link response} 
 		 */
 		readonly res: response;
@@ -298,21 +298,21 @@ export namespace toastiebun {
 		readonly query: URLSearchParams;
 
 		/**
-		 * Provides the current path that caught by request
+		 * Provides the current path of the request.
 		 * 
 		 * @see {@link server.use}
 		 */
 		path: toastiebun.path;
 
 		/**
-		 * HTTP Headers of the request 
+		 * HTTP Headers of the request.
 		 * 
 		 * @see {@link https://datatracker.ietf.org/doc/html/rfc2616#autoid-33}
 		 */
 		headers: Headers;
 
 		/**
-		 * Returns text as a promise
+		 * Returns text as a promise.
 		 * 
 		 * @example
 		 * const body = await req.text()
