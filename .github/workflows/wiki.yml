@@ -1,9 +1,11 @@
 name: Publish wiki
 
 on:
-  workflow_dispatch: true
   release:
     types: [published]
+  workflow_dispatch:
+    
+
 
 concurrency:
   group: publish-wiki
