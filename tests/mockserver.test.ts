@@ -24,6 +24,8 @@ const mockserver = new toastie.server()
 	.websocket("/echo-ws", (ws) => {
 		ws.on("data", (data) => {
 			ws.send(data);
+			if (data.toString() == "exit")
+				ws.close();
 		})
 	})
 	.get("/test-route", (req, res) => {
@@ -72,11 +74,9 @@ const mockserver = new toastie.server()
 	});
 
 beforeAll(async () => {
-	mockserver.listen(mockhost, mockport, async () => {
-		test("Server Hooked?", async () => {
-			expect((await fetch(`${endpoint}`)).ok).toBe(true);
-		});
-	});
+	mockserver.listen(mockhost, mockport, () => {
+		console.log("Server Hooked!");
+	});	
 });
 
 

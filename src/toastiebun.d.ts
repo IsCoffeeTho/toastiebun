@@ -381,5 +381,6 @@ export namespace toastiebun {
 		on: eventHandler<websocketEvents>;
 		once: eventHandler<websocketEvents>;
 		send(m: string | Buffer | Uint8Array): boolean;
+		close(code?: number, reason?: string): void;
 	}
 }
