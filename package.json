@@ -10,6 +10,7 @@
 		"typedoc-github-wiki-theme": "^2.0.0",
 		"typedoc-plugin-markdown": "^4.2.6",
 		"typedoc-plugin-merge-modules": "^6.0.0",
+		"typedoc-plugin-rename-defaults": "^0.7.1",
 		"ws": "^8.18.0"
 	},
 	"peerDependencies": {
@@ -26,7 +27,8 @@
 	"license": "ISC",
 	"scripts": {
 		"test": "bun test",
-		"start": "bun run example.js"
+		"start": "bun run example.ts",
+		"wiki": "bunx typedoc"
 	},
 	"type": "module"
 }

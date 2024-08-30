@@ -10,36 +10,37 @@ import websocket from "./websocket";
 import thispkg from "../package.json";
 
 
-/**
- * 
- * @see {@link toastiebun.serverOptions}
- * @example
- * const app = new toastiebun.server()
- * 
- * app.get("/", (req, res) => {
- * 	res.send("Hello World!");
- * })
- * 
- * app.listen("::1", 3000, () => {
- * 	console.log("http://[::1]:3000");
- * })
- */
 export default class server {
-	#routes: toastiebun.handleDescriptor[];
-	#running: boolean;
-	#s: Server | null;
-	host: string;
-	port: number;
+	#routes: toastiebun.handleDescriptor[] = [];
+	#running: boolean = false;
+	#s: Server | null = null;
+	/** Hostname of the server, once bound */
+	host: string = "";
+	/** Port of the server, once bound */
+	port: number = 0;
 	#opts?: toastiebun.serverOptions;
+	/** 
+	 * @example
+	 * const app = new toastiebun.server()
+	 * 
+	 * app.get("/", (req, res) => {
+	 * 	res.send("Hello World!");
+	 * })
+	 * 
+	 * app.listen("::1", 3000, () => {
+	 * 	console.log("http://[::1]:3000");
+	 * })
+	 */
 	constructor(opt?: toastiebun.serverOptions) {
 		this.#opts = opt;
-		this.#routes = [];
-		this.#running = false;
-		this.#s = null;
-		this.host = "";
-		this.port = 0;
 	}
 
+	/** Hooks middleware on server. */
+	use(middleware: server): this;
+	/** Hooks middleware on path. */
+	use(path: string | string[], middleware: server): this;
+
+	/** Implements a middleware server for requests. */
 	use(path: string | string[] | server, middleware?: server) {
 		var pathArray = <string[]>[];
 
@@ -63,6 +64,7 @@ export default class server {
 		return this;
 	}
 
+	
 	all(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("*", path, fn); return this; }
 	get(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("GET", path, fn); return this; }
 	put(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("PUT", path, fn); return this; }
@@ -70,7 +72,7 @@ export default class server {
 	patch(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("PATCH", path, fn); return this; }
 	delete(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("DELETE", path, fn); return this; }
 	websocket(path: string, fn: toastiebun.websocketHandler) { this.#addCatch("WS", path, fn); return this; }
-	#addCatch(method: toastiebun.method, path: string, fn: toastiebun.handlerFunction | server | toastiebun.websocketHandler) {
+	#addCatch(method: toastiebun.catchMethod, path: string, fn: toastiebun.handlerFunction | server | toastiebun.websocketHandler) {
 		if (!toastiebun.pathPatternLike.test(path))
 			throw new TypeError("path is not toastiebun.pathPatern");
 		this.#routes.push({
@@ -80,7 +82,7 @@ export default class server {
 		});
 	}
 
-	#getRoutes(method: toastiebun.method, path: string) {
+	#getRoutes(method: toastiebun.catchMethod, path: string) {
 		return this.#routes.filter((route) => {
 			if (route.method == "MIDDLEWARE")
 				return (path == route.path || path.startsWith(route.path.at(-1) != '/' ? `${route.path}/` : route.path));
@@ -109,6 +111,7 @@ export default class server {
 		});
 	}
 
+	/** @ignore */
 	async trickleRequest(req: request, res: response, next: toastiebun.nextFn) {
 		var caughtOnce = false;
 		var continueAfterCatch = false;
@@ -158,7 +161,11 @@ export default class server {
 		return caughtOnce;
 	}
 
-	listen(host: string, port: number, fn?: (server: server) => any) {
+	/** Hooks server to an Address and Port
+	 * 
+	 * @see {@link server.constructor}
+	*/
+	listen(host: string, port: number, callback?: (server: server) => any) {
 		if (this.#running)
 			return false;
 		this.#running = true;
@@ -225,8 +232,8 @@ export default class server {
 		});
 		this.host = this.#s.hostname;
 		this.port = this.#s.port;
-		if (fn)
-			fn(this);
+		if (callback)
+			callback(this);
 		return true;
 	}
 }

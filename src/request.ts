@@ -33,8 +33,9 @@ export default class request {
 	 * @TODO write info
 	 */
 	cookies: Map<string, string | boolean>;
+
 	/**
-	 * @TODO write info
+	 * Represents a list of all the routes that "caught" the request before this handler.
 	 */
 	routeStack: toastiebun.route[];
 	
@@ -80,7 +81,7 @@ export default class request {
 	hostname: string;
 
 	/**
-	 * @TODO write info
+	 * Request persistent data for developers to manipulate and keep track of.
 	 */
 	data: any;
 	constructor(parent: server, req: Request, res: response) {

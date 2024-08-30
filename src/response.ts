@@ -11,7 +11,7 @@ import thispkg from "../package.json";
  * @hideconstructor
  */
 export default class response {
-	#body: toastiebun.httpBody;
+	#body: any;
 	#status: toastiebun.HTTPStatus;
 	#headers: {
 		[field: string]: string[]; // each line in an array is condidered another header entry of the same field
@@ -153,7 +153,7 @@ export default class response {
 		return true;
 	}
 
-	sendStatic(path: toastiebun.path, errorCallback?: (err?: Error) => any): boolean {
+	sendStatic(path: string, errorCallback?: (err?: Error) => any): boolean {
 		var retval = this.sendFile(path, errorCallback);
 		if (!retval)
 			return false;
@@ -170,7 +170,7 @@ export default class response {
 		return retval;
 	}
 
-	sendFile(path: toastiebun.path, errorCallback?: (err?: Error) => any): boolean {
+	sendFile(path: string, errorCallback?: (err?: Error) => any): boolean {
 		try {
 			if (this.#sentHeaders)
 				throw response.#InvalidHeaderAccess;

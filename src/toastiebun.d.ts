@@ -2,6 +2,8 @@ import { BunFile, Server } from "bun";
 import { Socket } from "net";
 import { Headers } from "fetch";
 import server from "./server";
+import request from "./request";
+import response from "./response";
 
 export namespace toastiebun {
 	/**
@@ -15,10 +17,19 @@ export namespace toastiebun {
 	 * @type {RegExp}
 	 */
 	export const pathLike: RegExp = /^([a-zA-Z0-9]|[\/+-_.]|\%[0-9a-fA-F][0-9a-fA-F])+$/;
-	export type path = string;
 
 	/**
-	 *	@see {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes}
+	 * Regular expression pattern to match strings resembling Cookie Names.
+	 *
+	 * This regex pattern can be used to identify and validate strings that resemble
+	 * cookie names.
+	 * 
+	 * > {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes}
+	 * > 
+	 * > A `<cookie-name>` can contain any US-ASCII characters except for: control characters ([ASCII](https://developer.mozilla.org/en-US/docs/Glossary/ASCII) characters 0 up to 31 and ASCII character 127) or separator characters (space, tab and the characters: `( ) < > @ , ; : \ " / [ ] ? = { }`)
+	 * 
+	 * @internal
+	 * @type {RegExp}
 	 */
 	export const cookieNameLike = /[_!#$%'*+.^`|~a-zA-Z0-9\-]/g;
 
@@ -30,19 +41,10 @@ export namespace toastiebun {
 	 * such as letters, numbers, '/', '+', '-', '_', '.', URL-encoded characters like '%20',
 	 * and the '*' character, which serves as an optional wildcard to match the ends of strings.
 	 *
+	 * @internal
 	 * @type {RegExp}
 	 */
 	export const pathPatternLike: RegExp = /^(([a-zA-Z0-9]|[\/+-_.]|\%[0-9a-fA-F][0-9a-fA-F])+\*{0,1}|\*)$/;
-
-	/**
-	 * HTTP request paths, with optional wildcard support.
-	 *
-	 * This type is designed to identify paths used in HTTP requests. It includes characters
-	 * commonly found in HTTP paths such as letters, numbers, '/', '+', '-', '_', '.',
-	 * URL-encoded characters like '%20', and the '*' character, which serves as an optional
-	 * wildcard to match the ends of strings.
-	 */
-	export type pathPattern = string;
 
 	/**
 	 * Represents HTTP methods commonly used in web development, including a catch all `"*"` and a `"MIDDLEWARE"` indicator
@@ -54,22 +56,21 @@ export namespace toastiebun {
 	 * - `"PUT"`: The HTTP PUT method updates a resource or creates one if it doesn't exist.
 	 * - `"DELETE"`: The HTTP DELETE method deletes a specified resource.
 	 * - `"PATCH"`: The HTTP PATCH method applies partial modifications to a resource.
-	 * - `"HEAD"`: The HTTP HEAD method retrieves headers of a specified resource without the body.
-	 * - `"OPTIONS"`: The HTTP OPTIONS method retrieves information about the communication options.
 	 * 
-	 * ***as well as***
-	 * - `"*"`: Represents a wildcard that encompasses all HTTP methods.
-	 * - `"MIDDLEWARE"`: Represents a custom value for middleware handling, where a request is sent
-	 * to a sub-handler to modify or decorate it as it's being processed.
-	 * @internal
+	 * ## Note for Development
+	 * You may notice the missing `HEAD`, `TRACE`, `CONNECTION` and `OPTIONS` methods. These methods are
+	 * purposely omitted from the Library due to them already being handled
 	 */
-	export type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "*" | "MIDDLEWARE" | "WS";
+	export type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+	/** @internal */
+	export type catchMethod = method | "*" | "MIDDLEWARE" | "WS";
+	/** @ignore */
+	export type HTTPMethod = method | "HEAD" | "TRACE" | "CONNCTION" | "OPTIONS";
 
-	/**
-	 * @internal
-	 * @param {any} ctx - unused
-	 */
-	export type nextFn = (ctx?: any) => any;
+	/** Anonymous function that can not be manipulated
+	 * @see {@link handlerFunction}
+	*/
+	export type nextFn = () => any;
 
 	/**
 	 * HTTP Handler Function
@@ -82,6 +83,8 @@ export namespace toastiebun {
 	 * @param {response} res - The HTTP response object to modify.
 	 * @param {function} next - The callback function to call the next Handler (if any).
 	 * @returns {any}
+	 * @see
+	 * {@link server.all}
 	 */
 	export type handlerFunction = (req: request, res: response, next: nextFn) => any;
 
@@ -100,6 +103,7 @@ export namespace toastiebun {
 	 * 
 	 * A handler descriptor is used to describe a path and a {@link handlerFunction}
 	 * 
+	 * @ignore
 	 * @see {@link handlerFunction} 
 	 */
 	export type catchDescriptor<T> = (path: pathPattern, handler: T) => any;
@@ -111,7 +115,7 @@ export namespace toastiebun {
 	 */
 	export type route = {
 		path: string,
-		method: method,
+		method: catchMethod,
 	};
 
 	/**
@@ -124,9 +128,20 @@ export namespace toastiebun {
 	};
 
 	/**
-	 * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status}
+	 * HTTP response status codes indicate whether a specific HTTP request has been successfully completed. Responses are grouped in five classes:
+	 *
+	 * 1. Informational responses (`100` – `199`)
+	 * 2. Successful responses (`200` – `299`)
+	 * 3. Redirection messages (`300` – `399`)
+	 * 4. Client error responses (`400` – `499`)
+	 * 5. Server error responses (`500` – `599`)
+	 * 
+	 * ## See Also
+	 * {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status}
+	 * @enum {number}
 	 */
 	export enum HTTPStatus {
+
 		// Informational responses (100–199)
 		CONTINUE = 100,
 		SWITCHING_PROTOCOLS = 101,
@@ -201,13 +216,7 @@ export namespace toastiebun {
 	}
 
 	/**
-	 * @template TBM - Marked **T**o **B**e **M**odified
-	 * @internal
-	 */
-	export type httpBody = any;
-
-	/**
-	 * @template TBM - Marked **T**o **B**e **M**odified
+	 * 
 	 */
 	export type serverOptions = {
 		tls?: {
