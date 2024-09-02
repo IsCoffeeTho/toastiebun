@@ -9,29 +9,45 @@ import websocket from "./websocket";
 // @ts-ignore // just imports version number
 import thispkg from "../package.json";
 
-export default class server implements toastiebun.server {
-	#routes: toastiebun.handleDescriptor[];
-	#running: boolean;
-	#s: Server | null;
-	host: string;
-	port: number;
+
+export default class server {
+	#routes: toastiebun.handleDescriptor[] = [];
+	#running: boolean = false;
+	#s: Server | null = null;
+	/** Hostname of the server, once bound */
+	host: string = "";
+	/** Port of the server, once bound */
+	port: number = 0;
 	#opts?: toastiebun.serverOptions;
+	/** 
+	 * @example
+	 * const app = new toastiebun.server()
+	 * 
+	 * app.get("/", (req, res) => {
+	 * 	res.send("Hello World!");
+	 * })
+	 * 
+	 * app.listen("::1", 3000, () => {
+	 * 	console.log("http://[::1]:3000");
+	 * })
+	 */
 	constructor(opt?: toastiebun.serverOptions) {
 		this.#opts = opt;
-		this.#routes = [];
-		this.#running = false;
-		this.#s = null;
-		this.host = "";
-		this.port = 0;
 	}
 
-	use(path: string | string[] | toastiebun.server, middleware?: toastiebun.server) {
+	/** Hooks middleware on server. */
+	use(middleware: server): this;
+	/** Hooks middleware on path. */
+	use(path: string | string[], middleware: server): this;
+
+	/** Implements a middleware server for requests. */
+	use(path: string | string[] | server, middleware?: server) {
 		var pathArray = <string[]>[];
 
 		if (path instanceof server) {
-			middleware = <toastiebun.server>path;
+			middleware = <server>path;
 			path = "/";
-		} else if (!middleware || !(middleware satisfies toastiebun.server)) {
+		} else if (!middleware || !(middleware satisfies server)) {
 			throw new TypeError("Missing middleware for toastiebun.use(path?: string | string[], middleware: server)");
 		}
 
@@ -43,23 +59,20 @@ export default class server implements toastiebun.server {
 		pathArray.forEach((p, i) => {
 			if (!toastiebun.pathPatternLike.test(p))
 				throw new TypeError(`path[${i}] is not toastiebun.URILike`);
-			this.#addCatch("MIDDLEWARE", p ?? "/", <toastiebun.server>middleware);
+			this.#addCatch("MIDDLEWARE", p ?? "/", <server>middleware);
 		})
 		return this;
 	}
 
+	
 	all(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("*", path, fn); return this; }
 	get(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("GET", path, fn); return this; }
 	put(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("PUT", path, fn); return this; }
 	post(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("POST", path, fn); return this; }
-	head(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("HEAD", path, fn); return this; }
-	trace(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("TRACE", path, fn); return this; }
 	patch(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("PATCH", path, fn); return this; }
 	delete(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("DELETE", path, fn); return this; }
 	websocket(path: string, fn: toastiebun.websocketHandler) { this.#addCatch("WS", path, fn); return this; }
-	options(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("OPTIONS", path, fn); return this; }
-	connect(path: string, fn: toastiebun.handlerFunction) { this.#addCatch("CONNECT", path, fn); return this; }
-	#addCatch(method: toastiebun.method, path: toastiebun.pathPattern, fn: toastiebun.handlerFunction | toastiebun.server | toastiebun.websocketHandler) {
+	#addCatch(method: toastiebun.catchMethod, path: string, fn: toastiebun.handlerFunction | server | toastiebun.websocketHandler) {
 		if (!toastiebun.pathPatternLike.test(path))
 			throw new TypeError("path is not toastiebun.pathPatern");
 		this.#routes.push({
@@ -69,7 +82,7 @@ export default class server implements toastiebun.server {
 		});
 	}
 
-	#getRoutes(method: toastiebun.method, path: string) {
+	#getRoutes(method: toastiebun.catchMethod, path: string) {
 		return this.#routes.filter((route) => {
 			if (route.method == "MIDDLEWARE")
 				return (path == route.path || path.startsWith(route.path.at(-1) != '/' ? `${route.path}/` : route.path));
@@ -98,7 +111,8 @@ export default class server implements toastiebun.server {
 		});
 	}
 
-	async trickleRequest(req: toastiebun.request, res: toastiebun.response, next: toastiebun.nextFn) {
+	/** @ignore */
+	async trickleRequest(req: request, res: response, next: toastiebun.nextFn) {
 		var caughtOnce = false;
 		var continueAfterCatch = false;
 		var nextFn: toastiebun.nextFn = () => { continueAfterCatch = true; };
@@ -147,76 +161,79 @@ export default class server implements toastiebun.server {
 		return caughtOnce;
 	}
 
-	listen(host: string, port: number, fn?: (server: toastiebun.server) => any) {
-		if (!this.#running) {
-			this.#running = true;
-			var parent = this;
-			var tls = this.#opts?.tls ?? {};
+	/** Hooks server to an Address and Port
+	 * 
+	 * @see {@link server.constructor}
+	*/
+	listen(host: string, port: number, callback?: (server: server) => any) {
+		if (this.#running)
+			return false;
+		this.#running = true;
+		var parent = this;
+		var tls = this.#opts?.tls ?? {};
 
-			// default favicon
-			if (this.#getRoutes("GET", "/favicon.ico").length > 0) {
-				this.#routes.unshift({
-					method: "GET",
-					path: "/favicon.ico",
-					handler: (req, res) => {
-						res.sendFile(`${__dirname}/../assets/toastiebun.ico`);
-					}
-				});
-			}
-
-			this.#s = Bun.serve({
-				tls,
-				hostname: host,
-				port: port,
-				async fetch(req) {
-					var url = new URL(req.url);
-					var constructedResponse = new response(parent, req);
-					var constructedRequest = new request(parent, req, constructedResponse);
-					try {
-						await parent.trickleRequest(constructedRequest, constructedResponse, () => { });
-						if (constructedResponse.headerSent)
-							return constructedResponse.asBunResponse;
-						return new Response(`Cannot ${req.method} ${url.pathname}`, { status: 405, headers: { "Content-Type": "text/plain", "X-Powered-By": `ToastieBun v${thispkg.version}` } });
-					} catch (err: any) {
-						console.error(err);
-						return new Response(`500 Internal Server Error\nUncaught ${err.name}: ${err.message}`, { status: 500, headers: { "Content-Type": "text/plain", "X-Powered-By": `ToastieBun v${thispkg.version}` } });
-					}
-				},
-				websocket: {
-					message(ws, data) {
-						var tws = (<{ ws: websocket }>ws.data).ws;
-						try {
-							tws.emit("data", data);
-						}
-						catch (err) {
-							if (!tws.emit("error", err))
-								throw err;
-						}
-					},
-					open(ws) {
-						var handle = (<{ handle: toastiebun.websocketHandler }>ws.data).handle;
-						var tws = (<{ ws: websocket }>ws.data).ws;
-						tws.baseWS = <ServerWebSocket<unknown>>ws;
-						handle(tws);
-					},
-					close(ws, code, reason) {
-						var tws = (<{ ws: websocket }>ws.data).ws;
-						try {
-							tws.emit("close", code, reason);
-						}
-						catch (err) {
-							if (!tws.emit("error", err))
-								throw err;
-						}
-					}
+		// default favicon
+		if (this.#getRoutes("GET", "/favicon.ico").length > 0) {
+			this.#routes.unshift({
+				method: "GET",
+				path: "/favicon.ico",
+				handler: (req, res) => {
+					res.sendFile(`${__dirname}/../assets/toastiebun.ico`);
 				}
 			});
-			this.host = this.#s.hostname;
-			this.port = this.#s.port;
-			if (fn)
-				fn(this);
-			return true;
 		}
-		return false;
+
+		this.#s = Bun.serve({
+			tls,
+			hostname: host,
+			port: port,
+			async fetch(req) {
+				var url = new URL(req.url);
+				var constructedResponse = new response(parent, req);
+				var constructedRequest = new request(parent, req, constructedResponse);
+				try {
+					await parent.trickleRequest(constructedRequest, constructedResponse, () => { });
+					if (constructedResponse.headerSent)
+						return constructedResponse.asBunResponse;
+					return new Response(`Cannot ${req.method} ${url.pathname}`, { status: 405, headers: { "Content-Type": "text/plain", "X-Powered-By": `ToastieBun v${thispkg.version}` } });
+				} catch (err: any) {
+					console.error(err);
+					return new Response(`500 Internal Server Error\nUncaught ${err.name}: ${err.message}`, { status: 500, headers: { "Content-Type": "text/plain", "X-Powered-By": `ToastieBun v${thispkg.version}` } });
+				}
+			},
+			websocket: {
+				message(ws, data) {
+					var tws = (<{ ws: websocket }>ws.data).ws;
+					try {
+						tws.emit("data", data);
+					}
+					catch (err) {
+						if (!tws.emit("error", err))
+							throw err;
+					}
+				},
+				open(ws) {
+					var handle = (<{ handle: toastiebun.websocketHandler }>ws.data).handle;
+					var tws = (<{ ws: websocket }>ws.data).ws;
+					tws.baseWS = <ServerWebSocket<unknown>>ws;
+					handle(tws);
+				},
+				close(ws, code, reason) {
+					var tws = (<{ ws: websocket }>ws.data).ws;
+					try {
+						tws.emit("close", code, reason);
+					}
+					catch (err) {
+						if (!tws.emit("error", err))
+							throw err;
+					}
+				}
+			}
+		});
+		this.host = this.#s.hostname;
+		this.port = this.#s.port;
+		if (callback)
+			callback(this);
+		return true;
 	}
 }

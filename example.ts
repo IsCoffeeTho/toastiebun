@@ -1,4 +1,4 @@
-import toastieBun from ".";
+import toastiebun from ".";
 
 var _404_count = 0;
 var _host = "127.0.0.1";
@@ -18,7 +18,7 @@ if (process.argv.length > 3) {
 	_port = parseInt(process.argv[3]);
 }
 
-new toastieBun.server()
+new toastiebun.server()
 	.get("/fail", (req, res) => {
 		// this is another way to handle errors
 		res.sendStatic(`${__dirname}/mockserver/`, (err) => {
@@ -40,7 +40,7 @@ new toastieBun.server()
 			console.log("missing index moving on");
 	})
 	.websocket("/echo-ws", (ws) => {
-		ws.on("data", (data: Buffer) => {
+		ws.on("data", (data) => {
 			ws.send(data);
 		})
 	})
@@ -67,7 +67,7 @@ new toastieBun.server()
 	.get("/say/:word", (req, res) => {
 		res.send(req.params.word)
 	})
-	.use("/sub", new toastieBun.server()
+	.use("/sub", new toastiebun.server()
 		.get("/", (req, res) => {
 			res.sendFile(`${__dirname}/mockserver/subserver.html`, (err) => {
 				res.status(404).send(`404 File Not Found\nERR: ${err.message}`);

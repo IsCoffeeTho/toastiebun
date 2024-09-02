@@ -1,26 +1,28 @@
 import { BunFile } from "bun";
 import { existsSync, statSync } from "fs";
-import server from "./server";
 import { toastiebun } from "./toastiebun.d";
+import server from "./server";
 
-const thispkg = require("../package.json");
+// @ts-ignore // just imports version number
+import thispkg from "../package.json";
 
 /**
- * @todo remake the #httpframe field to allow a more dynamic creation system of teh bun response
+ * @TODO remake the #httpframe field to allow a more dynamic creation system of the bun response
+ * @hideconstructor
  */
-export default class response implements toastiebun.response {
-	#body: toastiebun.httpBody;
-	#status: toastiebun.httpStatus;
+export default class response {
+	#body: any;
+	#status: toastiebun.HTTPStatus;
 	#headers: {
 		[field: string]: string[]; // each line in an array is condidered another header entry of the same field
 	};
 	#contentType: string | null;
 	#sentHeaders: boolean = false;
-	#parent: toastiebun.server;
-	locals: { [key: string]: string };
+	#parent: server;
 	#cookies: { [key: string]: string };
 	#req: Request;
-	constructor(parent: toastiebun.server, req: Request) {
+	locals: { [key: string]: string };
+	constructor(parent: server, req: Request) {
 		this.#parent = parent;
 		this.#req = req;
 		this.#status = 200;
@@ -112,7 +114,7 @@ export default class response implements toastiebun.response {
 		return this;
 	}
 
-	status(code: toastiebun.httpStatus) {
+	status(code: toastiebun.HTTPStatus) {
 		if (this.#sentHeaders)
 			throw response.#InvalidHeaderAccess;
 		this.#status = code;
@@ -129,30 +131,29 @@ export default class response implements toastiebun.response {
 	send(body: any) {
 		if (this.#sentHeaders)
 			throw response.#InvalidHeaderAccess;
+		this.#sentHeaders = true;
 		if (this.#body satisfies BunFile) {
 			this.#body = body;
 			if (this.#contentType == null)
 				this.#contentType = (<BunFile>body).type;
 		} else if (Buffer.isBuffer(body)) {
 			this.#body = body.toString();
-		} else
-			switch (typeof body) {
-				case "object":
-					this.#body = JSON.stringify(body);
-					if (this.#contentType == null)
-						this.#contentType = "application/json";
-					break;
-				default:
-					this.#body = `${body}`;
-					if (this.#contentType == null)
-						this.#contentType = "text/plain";
-					break;
-			}
-		this.#sentHeaders = true;
+		} else switch (typeof body) {
+			case "object":
+				this.#body = JSON.stringify(body);
+				if (this.#contentType == null)
+					this.#contentType = "application/json";
+				break;
+			default:
+				this.#body = `${body}`;
+				if (this.#contentType == null)
+					this.#contentType = "text/plain";
+				break;
+		}
 		return true;
 	}
 
-	sendStatic(path: toastiebun.path, errorCallback?: (err?: any) => any) {
+	sendStatic(path: string, errorCallback?: (err?: Error) => any): boolean {
 		var retval = this.sendFile(path, errorCallback);
 		if (!retval)
 			return false;
@@ -162,14 +163,14 @@ export default class response implements toastiebun.response {
 			var modifiedSince = new Date((<string>this.#req.headers.get('If-Modified-Since')));
 			if (modifiedSince >= lastModified) {
 				this.#body = null;
-				this.#status = 304;
+				this.#status = toastiebun.HTTPStatus.NOT_MODIFIED;
 			}
 		} else
 			this.#headers["Last-Modified"] = [lastModified.toUTCString()];
 		return retval;
 	}
 
-	sendFile(path: toastiebun.path, errorCallback?: (err?: any) => any) {
+	sendFile(path: string, errorCallback?: (err?: Error) => any): boolean {
 		try {
 			if (this.#sentHeaders)
 				throw response.#InvalidHeaderAccess;
@@ -183,16 +184,16 @@ export default class response implements toastiebun.response {
 			var body = Bun.file(path);
 			this.#body = body;
 			if (body.size == 0 && Math.floor((<number>this.#status) / 100) == 2) {
-				this.#status = 204;
+				this.#status = toastiebun.HTTPStatus.NO_CONTENT;
 				this.#body = "";
 			}
 			if (this.#contentType == null)
 				this.#contentType = body.type;
 			this.#sentHeaders = true;
-		} catch (err) {
+		} catch (err: any) {
 			if (!errorCallback)
 				throw err;
-			errorCallback(err);
+			errorCallback(<Error>err);
 			return false;
 		}
 		return true;
@@ -231,12 +232,12 @@ export default class response implements toastiebun.response {
 	redirect(path: string) {
 		this.#headers["Location"] = [path];
 		if (this.#status < 300 && this.#status >= 400)
-			this.#status = 301;
+			this.#status = toastiebun.HTTPStatus.MOVED_PERMANENTLY;
 		return true;
 	}
 
 	/**
-	 * @todo re implement for a more robust response build system
+	 * @TODO re implement for a more robust response build system
 	 * @inner
 	 */
 	get asBunResponse() {

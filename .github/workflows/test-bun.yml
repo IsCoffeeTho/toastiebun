@@ -1,9 +1,9 @@
-name: unit-tests
+name: Unit Test
 
 on: push
 
 jobs:
-  unittest:
+  unit-test:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
