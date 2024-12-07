@@ -4,6 +4,7 @@ import { Headers } from "fetch";
 import server from "./server";
 import request from "./request";
 import response from "./response";
+import websocket from "./websocket";
 
 export namespace toastiebun {
 	/**
@@ -67,7 +68,8 @@ export namespace toastiebun {
 	/** @ignore */
 	export type HTTPMethod = method | "HEAD" | "TRACE" | "CONNCTION" | "OPTIONS";
 
-	/** Anonymous function that can not be manipulated
+	/** 
+	 * Simple Function type to be used in the `next()` system.
 	 * @see {@link handlerFunction}
 	*/
 	export type nextFn = () => any;
