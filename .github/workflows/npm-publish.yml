@@ -5,7 +5,7 @@ name: Publish NPM
 
 on:
   release:
-    types: [published]
+    types: [published, edited]
 
 jobs:
   publish-npm:
