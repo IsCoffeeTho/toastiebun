@@ -21,7 +21,7 @@ const mockserver = new toastie.server()
 		})
 		res.send("waited 50ms before responding");
 	})
-	.websocket("/echo-ws", (ws) => {
+	.websocket("/echo-ws", (ws) => {		
 		ws.on("data", (data) => {
 			ws.send(data);
 			if (data.toString() == "exit")
@@ -53,6 +53,12 @@ const mockserver = new toastie.server()
 	})
 	.get("/decrement", (req, res) => {
 		res.send(`${--dynamicCounter}`);
+	})
+	.get("/redirect", (req, res) => {
+		res.redirect(`/redirected`);
+	})
+	.get("/redirected", (req, res) => {
+		res.send("PASS");
 	})
 	.get("/say/:word", (req, res) => {
 		res.send(req.params.word)

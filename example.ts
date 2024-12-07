@@ -56,6 +56,12 @@ new toastiebun.server()
 			res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
 		});
 	})
+	.get("/redirect", (req, res) => {
+		res.redirect(`/redirected?=${req.path}`);
+	})
+	.get("/redirected", (req, res) => {
+		res.send("redirected from redirect");
+	})
 	.get("/empty", (req, res) => {
 		res.sendFile(`${__dirname}/mockserver/emptyFile.txt`, (err) => {
 			res.status(404).send(`404\nThe file exists but is empty\n\nHand Written Error`);

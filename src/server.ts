@@ -205,9 +205,11 @@ export default class server {
 				message(ws, data) {
 					var tws = (<{ ws: websocket }>ws.data).ws;
 					try {
+						if (typeof data == "string")
+							data = Buffer.from(data);
 						tws.emit("data", data);
 					}
-					catch (err) {
+					catch (err: any) {
 						if (!tws.emit("error", err))
 							throw err;
 					}
@@ -223,7 +225,7 @@ export default class server {
 					try {
 						tws.emit("close", code, reason);
 					}
-					catch (err) {
+					catch (err: any) {
 						if (!tws.emit("error", err))
 							throw err;
 					}

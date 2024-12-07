@@ -6,15 +6,16 @@
 	"module": "index.ts",
 	"devDependencies": {
 		"bun-types": "latest",
-		"typedoc": "^0.26.6",
-		"typedoc-github-wiki-theme": "^2.0.0",
-		"typedoc-plugin-markdown": "^4.2.6",
-		"typedoc-plugin-merge-modules": "^6.0.0",
-		"typedoc-plugin-rename-defaults": "^0.7.1",
+		"typedoc": "^0.27.3",
+		"typedoc-github-wiki-theme": "latest",
+		"typedoc-plugin-markdown": "latest",
+		"typedoc-plugin-merge-modules": "latest",
+		"typedoc-plugin-rename-defaults": "latest",
 		"ws": "^8.18.0"
 	},
 	"peerDependencies": {
-		"typescript": "^5.5.4"
+		"typescript": "^5.7.2",
+		"typedoc": "^0.27.3"
 	},
 	"description": "ToastieBun is an express like bun based http server framework.",
 	"keywords": [

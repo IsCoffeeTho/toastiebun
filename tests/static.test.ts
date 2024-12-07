@@ -29,6 +29,12 @@ test("404", async () => {
 		.toBe(404);
 });
 
+test("redirection", async () => {
+	const request = (await fetch(`${endpoint}/redirect`));
+	expect(request.redirected).toBe(true);
+	expect(request.url).toBe(`${endpoint}/redirected`);
+});
+
 test("async", async () => {
 	expect((await fetch(`${endpoint}/async`)).status)
 		.toBe(200);

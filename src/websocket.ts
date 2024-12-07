@@ -1,5 +1,6 @@
 import { EventEmitter } from "stream";
 import { ServerWebSocket } from "bun";
+import { toastiebun } from "./toastiebun.d";
 
 export default class websocket {
 	#ev: EventEmitter;
@@ -14,11 +15,11 @@ export default class websocket {
 			this.#ws = ws;
 	}
 
-	on(event: string, fn: (...args: any[]) => any) { return this.#ev.on(event, fn); }
-	once(event: string, fn: (...args: any[]) => any) { return this.#ev.once(event, fn); }
-	emit(event: string, ...args: any[]) { return this.#ev.emit(event, ...args); }
+	on<ev extends keyof toastiebun.websocketEvents>(event: ev, fn: (...args: toastiebun.websocketEvents[ev]) => any) { return this.#ev.on(event, fn); }
+	once<ev extends keyof toastiebun.websocketEvents>(event: ev, fn: (...args: toastiebun.websocketEvents[ev]) => any) { return this.#ev.once(event, fn); }
+	emit<ev extends keyof toastiebun.websocketEvents>(event: ev, ...args: toastiebun.websocketEvents[ev]) { return this.#ev.emit(event, ...args); }
 
-	send(m: string | Buffer | Uint8Array, compressed = false): boolean {
+	send(m: string | Bun.BufferSource, compressed = false): boolean {
 		if (!this.#ws)
 			return false;
 		this.#ws.send(m, compressed);
