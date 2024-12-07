@@ -21,7 +21,7 @@ const mockserver = new toastie.server()
 		})
 		res.send("waited 50ms before responding");
 	})
-	.websocket("/echo-ws", (ws) => {
+	.websocket("/echo-ws", (ws) => {		
 		ws.on("data", (data) => {
 			ws.send(data);
 			if (data.toString() == "exit")

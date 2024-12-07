@@ -32,7 +32,7 @@ export namespace toastiebun {
 	 * @internal
 	 * @type {RegExp}
 	 */
-	export const cookieNameLike = /[_!#$%'*+.^`|~a-zA-Z0-9\-]/g;
+	export const cookieNameLike : RegExp = /[_!#$%'*+.^`|~a-zA-Z0-9\-]/g;
 
 	/**
 	 * Regular expression pattern to match HTTP request paths, with optional wildcard support.
@@ -95,7 +95,7 @@ export namespace toastiebun {
 	 * 
 	 * A handler function that creates and supplies a websocket to hook on for ws requests.
 	 * 
-	 * @param {toastiebun.websocket} ws - The Websocket to hook.
+	 * @param {websocket} ws - The Websocket to hook.
 	 * @returns {void}
 	 */
 	export type websocketHandler = (ws: websocket) => void;
@@ -246,7 +246,4 @@ export namespace toastiebun {
 		"close": [number, string],
 		"error": [Error]
 	};
-
-	// @ts-ignore // works anyway
-	type eventHandler<events> = <ev extends keyof events>(eventName: ev, fn: ((...args: (events[ev])) => any)) => any;
 }

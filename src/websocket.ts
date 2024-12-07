@@ -2,13 +2,7 @@ import { EventEmitter } from "stream";
 import { ServerWebSocket } from "bun";
 import { toastiebun } from "./toastiebun.d";
 
-type websocketEventHandler = {
-	on: toastiebun.eventHandler<toastiebun.websocketEvents>,
-	once: toastiebun.eventHandler<toastiebun.websocketEvents>,
-	emit: toastiebun.eventHandler<toastiebun.websocketEvents>
-}
-
-export default class websocket implements websocketEventHandler {
+export default class websocket {
 	#ev: EventEmitter;
 	#ws: ServerWebSocket<unknown> | null;
 	constructor() {
@@ -20,11 +14,10 @@ export default class websocket implements websocketEventHandler {
 		if (!this.#ws)
 			this.#ws = ws;
 	}
-	
 
-	on(event: string, fn: (...args: any[]) => any) { return this.#ev.on(event, fn); }
-	once(event: string, fn: (...args: any[]) => any) { return this.#ev.once(event, fn); }
-	emit(event: string, ...args: any[]) { return this.#ev.emit(event, ...args); }
+	on<ev extends keyof toastiebun.websocketEvents>(event: ev, fn: (...args: toastiebun.websocketEvents[ev]) => any) { return this.#ev.on(event, fn); }
+	once<ev extends keyof toastiebun.websocketEvents>(event: ev, fn: (...args: toastiebun.websocketEvents[ev]) => any) { return this.#ev.once(event, fn); }
+	emit<ev extends keyof toastiebun.websocketEvents>(event: ev, ...args: toastiebun.websocketEvents[ev]) { return this.#ev.emit(event, ...args); }
 
 	send(m: string | Bun.BufferSource, compressed = false): boolean {
 		if (!this.#ws)
