@@ -42,11 +42,11 @@ test("Cookies", async () => {
 		"cookie2=value2; Path=/",
 	]);
 
-	expect(await makeRequest(`${endpoint}/clear-cookie/testCookie1`)).toEqual(["testCookie1=; Max-Age=0"]);
+	expect(await makeRequest(`${endpoint}/clear-cookie/testCookie1`)).toEqual(["testCookie1=; Max-Age=0; Path=/"]);
 
-	expect(await makeRequest(`${endpoint}/clear-cookie/cookie2`)).toEqual(["cookie2=; Max-Age=0"]);
+	expect(await makeRequest(`${endpoint}/clear-cookie/cookie2`)).toEqual(["cookie2=; Max-Age=0; Path=/"]);
 
-	expect(await makeRequest(`${endpoint}/clear-cookie/nothing`)).toEqual(["nothing=; Max-Age=0"]);
+	expect(await makeRequest(`${endpoint}/clear-cookie/nothing`)).toEqual(["nothing=; Max-Age=0; Path=/"]);
 });
 
 test("POST", async () => {

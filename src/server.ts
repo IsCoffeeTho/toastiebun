@@ -183,14 +183,15 @@ export default class server {
 			});
 		}
 
+		
 		this.#s = Bun.serve({
 			tls,
 			hostname: host,
 			port: port,
-			async fetch(req) {
+			async fetch(this, req) {
 				var url = new URL(req.url);
 				var constructedResponse = new response(parent, req);
-				var constructedRequest = new request(parent, req, constructedResponse);
+				var constructedRequest = new request(parent, req, constructedResponse, this.requestIP(req));
 				try {
 					await parent.trickleRequest(constructedRequest, constructedResponse, () => { });
 					if (constructedResponse.headerSent)

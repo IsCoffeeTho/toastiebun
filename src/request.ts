@@ -68,6 +68,12 @@ export default class request {
 	 * 
 	 */
 	readonly query: URLSearchParams;
+	
+	/**
+	 * Internet Protocal Address of the request.
+	 * 
+	 */
+	readonly ip: string;
 
 	/**
 	 * @TODO write info
@@ -84,9 +90,10 @@ export default class request {
 	 * Request persistent data for developers to manipulate and keep track of.
 	 */
 	data: any;
-	constructor(parent: server, req: Request, res: response) {
+	constructor(parent: server, req: Request, res: response, ip: string) {
 		this.#parent = parent;
 		this.#bunReq = req;
+		this.ip = ip;
 		this.baseUrl = this.#bunReq.url;
 		const urlobj = new URL(this.#bunReq.url)
 		this.path = urlobj.pathname;
@@ -127,12 +134,6 @@ export default class request {
 	 * HTTP Method of the request.
 	 */
 	get method() { return this.#method; }
-
-	/**
-	 * Internet Protocal Address of the request.
-	 * 
-	 */
-	get ip() { return this.#bunReq.destination; }
 
 	/**
 	 * Represents the toastiebun {@link server} that is serving the request.
