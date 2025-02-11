@@ -1,6 +1,6 @@
 .*
 !.git*
-bun.lockb
+bun.lock*
 package-lock.json
 node_modules
 wiki
