@@ -103,9 +103,9 @@ export default class response {
 	clearCookie(name: string) {
 		if (this.#sentHeaders)
 			throw response.#InvalidHeaderAccess;
-		if (!toastiebun.cookieNameLike.test(name))
-			throw new SyntaxError("name has invalid characters");
-		this.#cookies.set(name, "; Max-Age=0");
+		if (!name.match(toastiebun.cookieNameLike))
+			throw new SyntaxError(`cookie name "${name}" has invalid characters `);
+		this.#cookies.set(name, "; Max-Age=0; Path=/");
 		return this;
 	}
 
