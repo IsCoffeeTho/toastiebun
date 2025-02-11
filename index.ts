@@ -3,9 +3,11 @@ import response from "./src/response";
 import request from "./src/request";
 import websocket from "./src/websocket";
 
-export default {
+const toastiebun = {
 	server,
 	request,
 	response,
 	websocket
 };
+
+export default toastiebun;

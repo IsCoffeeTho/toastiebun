@@ -2,6 +2,7 @@ import { BunFile } from "bun";
 import { existsSync, statSync } from "fs";
 import { toastiebun } from "./toastiebun.d";
 import server from "./server";
+import request from "./request";
 
 // @ts-ignore // just imports version number
 import thispkg from "../package.json";
@@ -13,13 +14,11 @@ import thispkg from "../package.json";
 export default class response {
 	#body: any;
 	#status: toastiebun.HTTPStatus;
-	#headers: {
-		[field: string]: string[]; // each line in an array is condidered another header entry of the same field
-	};
+	#headers: Headers;
 	#contentType: string | null;
 	#sentHeaders: boolean = false;
 	#parent: server;
-	#cookies: { [key: string]: string };
+	#cookies: Map<string, string | boolean>;
 	#req: Request;
 	locals: { [key: string]: string };
 	constructor(parent: server, req: Request) {
@@ -27,8 +26,8 @@ export default class response {
 		this.#req = req;
 		this.#status = 200;
 		this.#body = null;
-		this.#cookies = {};
-		this.#headers = {};
+		this.#cookies = new Map();
+		this.#headers = <Headers>new Headers();
 		this.locals = {};
 		this.#contentType = null;
 	}
@@ -40,9 +39,7 @@ export default class response {
 	get headerSent() { return this.#sentHeaders; }
 
 	get(field: string) {
-		if (!this.#headers[field])
-			return null;
-		return this.#headers[field];
+		return this.#headers.get(field);
 	}
 
 	append(field: string, value?: string | string[]) {
@@ -50,67 +47,72 @@ export default class response {
 			throw response.#InvalidHeaderAccess;
 		if (field == "Set-Cookie")
 			throw new Error("The Toastiebun module is not allowing you to set a cookie with the append function.");
-		if (!this.#headers[field])
-			this.#headers[field] = [];
-		if (typeof value == "object")
-			this.#headers[field].push(...value);
-		else if (typeof value == "string")
-			this.#headers[field].push(value);
+		if (!value)
+			value = [""];
+		if (typeof value == "string")
+			value = [value];
+		value.map((v) => {
+			this.#headers.append(field, v);
+		})
 		return this;
 	}
 
 	cookie(name: string, value: any, options?: toastiebun.cookieOptions) {
 		if (this.#sentHeaders)
 			throw response.#InvalidHeaderAccess;
-		if (!toastiebun.cookieNameLike.test(name))
-			throw new SyntaxError("name has invalid characters");
-		this.#cookies[name] = `${value}`;
-		if (!options)
+		if (!name.match(toastiebun.cookieNameLike))
+			throw new SyntaxError(`cookie name "${name}" has invalid characters `);
+		if (!options) {
+			this.#cookies.set(name, `${value}; Path=/`);
 			return this;
+		}
 		if (options.domain)
-			this.#cookies[name] += `; Domain=${options.domain}`;
+			value += `; Domain=${options.domain}`;
 		if (options.expires)
-			this.#cookies[name] += `; Expires=${options.expires.toUTCString()}`;
+			value += `; Expires=${options.expires.toUTCString()}`;
 		if (options.httpOnly)
-			this.#cookies[name] += `; HttpOnly`;
+			value += `; HttpOnly`;
 		if (options.maxAge)
-			this.#cookies[name] += `; Max-Age=${options.maxAge}`;
+			value += `; Max-Age=${options.maxAge}`;
 		if (options.path)
-			this.#cookies[name] += `; Path=${options.path}`;
+			value += `; Path=${options.path}`;
+		else
+			value += `; Path=/`;
 		if (options.secure)
-			this.#cookies[name] += `; Secure`;
+			value += `; Secure`;
 		if (options.sameSite) {
 			if (typeof options.sameSite == "boolean")
-				this.#cookies[name] += `; SameSite=Strict`;
+				value += `; SameSite=Strict`;
 			else
 				switch (options.sameSite.toLocaleLowerCase()) {
-					case "strict": this.#cookies[name] += `; SameSite=Strict`; break;
-					case "lax": this.#cookies[name] += `; SameSite=Lax`; break;
+					case "strict": value += `; SameSite=Strict`; break;
+					case "lax": value += `; SameSite=Lax`; break;
 					case "none":
-						this.#cookies[name] += `; SameSite=None`;
+						value += `; SameSite=None`;
 						if (!options.secure)
-							this.#cookies[name] += `; Secure`;
+							value += `; Secure`;
 						break;
 					default:
 						throw new TypeError(`Invalid sameSite Directive, Allowed values:\ntrue, "Strict", "Lax", "None"`);
 				}
 		}
+		this.#cookies.set(name, value);
 		return this;
 	}
 
 	clearCookie(name: string) {
 		if (this.#sentHeaders)
 			throw response.#InvalidHeaderAccess;
-		if (!toastiebun.cookieNameLike.test(name))
-			throw new SyntaxError("name has invalid characters");
-		this.#cookies[name] = "; Max-Age=0";
+		if (!name.match(toastiebun.cookieNameLike))
+			throw new SyntaxError(`cookie name "${name}" has invalid characters `);
+		this.#cookies.set(name, "; Max-Age=0; Path=/");
 		return this;
 	}
 
 	markNoCache() {
 		if (this.#sentHeaders)
 			throw response.#InvalidHeaderAccess;
-		this.#headers["Cache-Control"] = ["no-store"];
+		this.#headers.set("Cache-Control", "no-store");
 		return this;
 	}
 
@@ -166,7 +168,7 @@ export default class response {
 				this.#status = toastiebun.HTTPStatus.NOT_MODIFIED;
 			}
 		} else
-			this.#headers["Last-Modified"] = [lastModified.toUTCString()];
+			this.#headers.set("Last-Modified", lastModified.toUTCString());
 		return retval;
 	}
 
@@ -233,7 +235,7 @@ export default class response {
 		try {
 			if (this.#sentHeaders)
 				throw response.#InvalidHeaderAccess;
-			this.#headers["Location"] = [path];
+			this.#headers.set("Location", path);
 			if (this.#status < 300 || this.#status >= 400)
 				this.#status = toastiebun.HTTPStatus.TEMPORARY_REDIRECT;
 			this.#body = "";
@@ -256,24 +258,15 @@ export default class response {
 			this.#body = "";
 
 		if (this.#contentType != null)
-			this.#headers["Content-Type"] = [this.#contentType];
+			this.#headers.set("Content-Type", this.#contentType);
 
-		var cookieHeaders: string[] = [];
-
-		for (var cookie in this.#cookies) {
-			var value = this.#cookies[cookie];
-			cookieHeaders.push(`${cookie}=${value}`);
-		}
+		this.#cookies.forEach((v, k) => {
+			this.#headers.append("Set-Cookie", `${k}=${v}`);
+		})
 
 		return new Response(this.#body, {
 			status: this.#status,
-			headers: {
-				...this.#headers,
-				...(cookieHeaders.length > 0 ? {
-					'Set-Cookie': cookieHeaders
-				} : {}),
-				"X-Powered-By": `ToastieBun v${thispkg.version}`
-			}
+			headers: this.#headers
 		});
 	}
 
