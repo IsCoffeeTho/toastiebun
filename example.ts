@@ -44,11 +44,17 @@ new toastiebun.server()
 			ws.send(data);
 		})
 	})
-	.get("/cookie", (req, res) => {
-		res.cookie("test","cookie").send("Set a Cookie!");
+	.get("/cookie/:name", (req, res) => {
+		res.cookie(req.params.name, "cookie").send("Set a Cookie!");
 	})
-	.get("/clear-cookie", (req, res) => {
-		res.clearCookie("test").send("Cleared a Cookie!");
+	.get("/cookie/:name/:value", (req, res) => {
+		res.cookie(req.params.name, req.params.value).send("Set a Cookie!");
+	})
+	.get("/multi-cookie", (req, res) => {
+		res.cookie("cookie1", "hi").cookie("cookie2", "hi").send(`Set two Cookies "cookie1" and "cookie2"!`);
+	})
+	.get("/clear-cookie/:name", (req, res) => {
+		res.clearCookie(req.params.name).send("Cleared a Cookie!");
 	})
 	.get("/file", (req, res) => {
 		// this is another way to handle errors

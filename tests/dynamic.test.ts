@@ -20,7 +20,7 @@ test("Cookies", async () => {
 	var cookies: string[] = [];
 
 	async function makeRequest(_endpoint: string) {
-		cookies = (
+		return (
 			await fetch(_endpoint, {
 				headers: {
 					cookie: `${cookies.join("; ")}`,
@@ -29,41 +29,24 @@ test("Cookies", async () => {
 		).headers.getSetCookie();
 	}
 
-	await makeRequest(`${endpoint}/cookie/testCookie1/testValue1`);
-	expect(cookies).toEqual(["testCookie1=testValue1"]);
+	expect(
+		await makeRequest(`${endpoint}/cookie/testCookie1/testValue1`),
+	).toEqual(["testCookie1=testValue1; Path=/"]);
 
-	await makeRequest(`${endpoint}/cookie/testCookie2/testValue2`);
-	expect(cookies).toEqual([
-		"testCookie1=testValue1",
-		"testCookie2=testValue2",
-	]);
+	expect(
+		await makeRequest(`${endpoint}/cookie/testCookie2/testValue2`),
+	).toEqual(["testCookie2=testValue2; Path=/"]);
 
-	await makeRequest(`${endpoint}/multi-cookie`);
-	expect(cookies).toEqual([
-		"testCookie1=testValue1",
-		"testCookie2=testValue2",
-		"cookie1=value1",
-		"cookie2=value2",
+	expect(await makeRequest(`${endpoint}/multi-cookie`)).toEqual([
+		"cookie1=value1; Path=/",
+		"cookie2=value2; Path=/",
 	]);
 
-	await makeRequest(`${endpoint}/clear-cookie/testCookie1`);
-	expect(cookies).toEqual([
-		"testCookie2=testValue2",
-		"cookie1=value1",
-		"cookie2=value2",
-	]);
-	
-	await makeRequest(`${endpoint}/clear-cookie/cookie2`);
-	expect(cookies).toEqual([
-		"testCookie2=testValue2",
-		"cookie1=value1",
-	]);
-	
-	await makeRequest(`${endpoint}/clear-cookie/nothing`);
-	expect(cookies).toEqual([
-		"testCookie2=testValue2",
-		"cookie1=value1",
-	]);
+	expect(await makeRequest(`${endpoint}/clear-cookie/testCookie1`)).toEqual(["testCookie1=; Max-Age=0"]);
+
+	expect(await makeRequest(`${endpoint}/clear-cookie/cookie2`)).toEqual(["cookie2=; Max-Age=0"]);
+
+	expect(await makeRequest(`${endpoint}/clear-cookie/nothing`)).toEqual(["nothing=; Max-Age=0"]);
 });
 
 test("POST", async () => {
