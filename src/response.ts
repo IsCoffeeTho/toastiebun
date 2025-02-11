@@ -235,7 +235,7 @@ export default class response {
 				throw response.#InvalidHeaderAccess;
 			this.#headers["Location"] = [path];
 			if (this.#status < 300 || this.#status >= 400)
-				this.#status = toastiebun.HTTPStatus.MOVED_PERMANENTLY;
+				this.#status = toastiebun.HTTPStatus.TEMPORARY_REDIRECT;
 			this.#body = "";
 			this.#sentHeaders = true;
 		} catch (err: any) {
