@@ -64,7 +64,8 @@ const mockserver = new toastie.server()
 		res.send(req.params.word)
 	})
 	.get("/cookie/:name/:word", (req, res) => {
-		res.cookie(req.params.name, req.params.word)
+		console.log(req.params.name, req.params.word);
+		res.cookie(req.params.name, req.params.word, {path: "/"})
 			.send(`set ${req.params.name}: ${req.params.word}`);
 	})
 	.get("/cookies", (req, res) => {
@@ -76,8 +77,8 @@ const mockserver = new toastie.server()
 		res.send(ret);
 	})
 	.get("/multi-cookie", (req, res) => {
-		res.cookie("cookie1", "value1")
-			.cookie("cookie2", "value2")
+		res.cookie("cookie1", "value1", {path: "/"})
+			.cookie("cookie2", "value2", {path: "/"})
 			.send(`set ${req.params.name}: ${req.params.word}`);
 	})
 	.get("/clear-cookie/:name", (req, res) => {
