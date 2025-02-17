@@ -98,22 +98,23 @@ export default class request {
 		const urlobj = new URL(this.#bunReq.url)
 		this.path = urlobj.pathname;
 		this.#method = <toastiebun.method>this.#bunReq.method;
-		this.params = {}; /** @TODO implement */
+		this.params = {};
 		this.query = urlobj.searchParams;
 		this.res = res;
 		this.cookies = new Map<string, string | boolean>();
 		var cookieHeader = this.#bunReq.headers.get("Cookie");
-		if (cookieHeader)
+		if (cookieHeader) {
 			cookieHeader.split(';').forEach((cookie) => {
 				var key = cookie;
 				var value: string | boolean = true;
 				var equals = cookie.indexOf('=');
 				if (equals != -1) {
-					key = cookie.slice(0, equals);
-					value = cookie.slice(equals + 1);
+					key = decodeURI(cookie.slice(0, equals).trim());
+					value = decodeURI(cookie.slice(equals + 1));
 				}
 				this.cookies.set(key, value);
 			});
+		}
 		this.routeStack = [];
 		this.#stale = false;
 		if (this.headers.get("Cache-Control") == 'no-cache')

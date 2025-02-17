@@ -22,7 +22,8 @@ new toastiebun.server()
 	.get("/fail", (req, res) => {
 		// this is another way to handle errors
 		res.sendStatic(`${__dirname}/mockserver/`, (err) => {
-			res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
+			if (err)
+				res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
 		});
 	})
 	.get("/async", async (req, res) => {
@@ -56,10 +57,19 @@ new toastiebun.server()
 	.get("/clear-cookie/:name", (req, res) => {
 		res.clearCookie(req.params.name).send("Cleared a Cookie!");
 	})
+	.get("/cookies", (req, res) => {
+		var cookies = req.cookies.entries().toArray();
+		var ret = {};
+		for (var cookie of cookies) {
+			ret[cookie[0]] = cookie[1];
+		}
+		res.send(ret);
+	})
 	.get("/file", (req, res) => {
 		// this is another way to handle errors
 		res.sendFile(`${__dirname}/mockserver/test.txt`, (err) => {
-			res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
+			if (err)
+				res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
 		});
 	})
 	.get("/redirect", (req, res) => {
@@ -70,7 +80,8 @@ new toastiebun.server()
 	})
 	.get("/empty", (req, res) => {
 		res.sendFile(`${__dirname}/mockserver/emptyFile.txt`, (err) => {
-			res.status(404).send(`404\nThe file exists but is empty\n\nHand Written Error`);
+			if (err)
+				res.status(404).send(`404\nThe file exists but is empty\n\nHand Written Error`);
 		});
 	})
 	.get("/long/path", (req, res) => {
@@ -82,7 +93,8 @@ new toastiebun.server()
 	.use("/sub", new toastiebun.server()
 		.get("/", (req, res) => {
 			res.sendFile(`${__dirname}/mockserver/subserver.html`, (err) => {
-				res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
+				if (err)
+					res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
 			});
 		})
 		.get("/*", (req, res) => {

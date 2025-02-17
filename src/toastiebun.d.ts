@@ -226,6 +226,10 @@ export namespace toastiebun {
 			cert: BunFile
 		}
 	};
+	
+	export type cookie = {
+		value: string,
+	} & cookieOptions;
 
 	export type cookieOptions = {
 		domain?: string,
