@@ -12,7 +12,23 @@ ToastieBun is an express like bun based http server framework.
 ```bash
 bun install toastiebun
 ```
-## Testing
+### Usage
+```ts
+// index.ts
+
+import toastiebun from "toastiebun";
+
+const app = new toastiebun.server();
+
+app.get("/", (req, res) => {
+	res.send("Hello from Toastiebun");
+})
+
+app.listen("127.0.0.1", 8000);
+```
+![Hello from Tostiebun](./docs/.assets/HelloWorld.png)
+
+## Development
 ```bash
 # Unit Tests
 bun test
