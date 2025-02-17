@@ -109,8 +109,8 @@ export default class request {
 				var value: string | boolean = true;
 				var equals = cookie.indexOf('=');
 				if (equals != -1) {
-					key = cookie.slice(0, equals).trim();
-					value = encodeURI(cookie.slice(equals + 1));
+					key = decodeURI(cookie.slice(0, equals).trim());
+					value = decodeURI(cookie.slice(equals + 1));
 				}
 				this.cookies.set(key, value);
 			});

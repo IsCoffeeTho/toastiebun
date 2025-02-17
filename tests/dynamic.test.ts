@@ -17,20 +17,10 @@ test("Parameters", async () => {
 });
 
 test("Cookies", async () => {
-	var cookies: string[] = [];
-
-	async function makeRequest(_endpoint: string) {
-		return (
-			await fetch(_endpoint, {
-				headers: {
-					cookie: `${cookies.join("; ")}`,
-				},
-			})
-		).headers.getSetCookie();
-	}
-
 	expect(
-		await makeRequest(`${endpoint}/cookie/testCookie1/testValue1`),
+		(
+			await fetch(`${endpoint}/cookie/testCookie1/testValue1`)
+		).headers.getSetCookie(),
 	).toEqual(["testCookie1=testValue1; Path=/"]);
 
 	expect(
@@ -46,13 +36,14 @@ test("Cookies", async () => {
 	});
 
 	expect(
-		await makeRequest(`${endpoint}/cookie/testCookie2/testValue2`),
+		(
+			await fetch(`${endpoint}/cookie/testCookie2/testValue2`)
+		).headers.getSetCookie(),
 	).toEqual(["testCookie2=testValue2; Path=/"]);
 
-	expect(await makeRequest(`${endpoint}/multi-cookie`)).toEqual([
-		"cookie1=value1; Path=/",
-		"cookie2=value2; Path=/",
-	]);
+	expect(
+		(await fetch(`${endpoint}/multi-cookie`)).headers.getSetCookie(),
+	).toEqual(["cookie1=value1; Path=/", "cookie2=value2; Path=/"]);
 
 	expect(
 		await (
@@ -67,21 +58,35 @@ test("Cookies", async () => {
 		cookie2: "value2",
 	});
 
-	expect(await makeRequest(`${endpoint}/clear-cookie/testCookie1`)).toEqual([
-		"testCookie1=; Max-Age=0; Path=/",
-	]);
+	expect(
+		(
+			await fetch(`${endpoint}/clear-cookie/testCookie1`)
+		).headers.getSetCookie(),
+	).toEqual(["testCookie1=; Max-Age=0; Path=/"]);
 
-	expect(await makeRequest(`${endpoint}/clear-cookie/cookie2`)).toEqual([
-		"cookie2=; Max-Age=0; Path=/",
-	]);
+	expect(
+		(
+			await fetch(`${endpoint}/clear-cookie/cookie2`)
+		).headers.getSetCookie(),
+	).toEqual(["cookie2=; Max-Age=0; Path=/"]);
 
-	expect(await makeRequest(`${endpoint}/clear-cookie/nothing`)).toEqual([
-		"nothing=; Max-Age=0; Path=/",
-	]);
-	
-	expect(await makeRequest(`${endpoint}/clear-cookie/nothing`)).toEqual([
-		"nothing=; Max-Age=0; Path=/",
-	]);
+	expect(
+		(
+			await fetch(`${endpoint}/clear-cookie/nothing`)
+		).headers.getSetCookie(),
+	).toEqual(["nothing=; Max-Age=0; Path=/"]);
+
+	expect(
+		await (
+			await fetch(`${endpoint}/cookies`, {
+				headers: {
+					cookie: `url%20encoded=value`,
+				},
+			})
+		).json(),
+	).toEqual({
+		"url encoded": "value",
+	});
 });
 
 test("POST", async () => {

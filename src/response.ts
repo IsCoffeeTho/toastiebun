@@ -18,7 +18,7 @@ export default class response {
 	#contentType: string | null;
 	#sentHeaders: boolean = false;
 	#parent: server;
-	#cookies: Map<string, string | boolean>;
+	#cookies: Map<string, toastiebun.cookie>;
 	#req: Request;
 	locals: { [key: string]: string };
 	constructor(parent: server, req: Request) {
@@ -62,41 +62,10 @@ export default class response {
 			throw response.#InvalidHeaderAccess;
 		if (!name.match(toastiebun.cookieNameLike))
 			throw new SyntaxError(`cookie name "${name}" has invalid characters `);
-		if (!options) {
-			this.#cookies.set(name, `${value}; Path=/`);
-			return this;
-		}
-		if (options.domain)
-			value += `; Domain=${options.domain}`;
-		if (options.expires)
-			value += `; Expires=${options.expires.toUTCString()}`;
-		if (options.httpOnly)
-			value += `; HttpOnly`;
-		if (options.maxAge)
-			value += `; Max-Age=${options.maxAge}`;
-		if (options.path)
-			value += `; Path=${options.path}`;
-		else
-			value += `; Path=/`;
-		if (options.secure)
-			value += `; Secure`;
-		if (options.sameSite) {
-			if (typeof options.sameSite == "boolean")
-				value += `; SameSite=Strict`;
-			else
-				switch (options.sameSite.toLocaleLowerCase()) {
-					case "strict": value += `; SameSite=Strict`; break;
-					case "lax": value += `; SameSite=Lax`; break;
-					case "none":
-						value += `; SameSite=None`;
-						if (!options.secure)
-							value += `; Secure`;
-						break;
-					default:
-						throw new TypeError(`Invalid sameSite Directive, Allowed values:\ntrue, "Strict", "Lax", "None"`);
-				}
-		}
-		this.#cookies.set(name, value);
+		this.#cookies.set(name, {
+			value,
+			...options
+		});
 		return this;
 	}
 
@@ -105,7 +74,11 @@ export default class response {
 			throw response.#InvalidHeaderAccess;
 		if (!name.match(toastiebun.cookieNameLike))
 			throw new SyntaxError(`cookie name "${name}" has invalid characters `);
-		this.#cookies.set(name, "; Max-Age=0; Path=/");
+		this.#cookies.set(name, {
+			value:"",
+			maxAge: 0,
+			path: "/"
+		});
 		return this;
 	}
 
@@ -261,7 +234,12 @@ export default class response {
 			this.#headers.set("Content-Type", this.#contentType);
 
 		this.#cookies.forEach((v, k) => {
-			this.#headers.append("Set-Cookie", `${k}=${v}`);
+			var cookieString = `${encodeURI(k)}=${encodeURI(`${v}`)}`
+			if (v.expires)
+				
+			if (v.path)
+				
+			this.#headers.append("Set-Cookie", cookieString);
 		})
 
 		return new Response(this.#body, {
