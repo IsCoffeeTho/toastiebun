@@ -232,8 +232,8 @@ export default class server {
 				}
 			}
 		});
-		this.host = this.#s.hostname;
-		this.port = this.#s.port;
+		this.host = <string>this.#s.hostname;
+		this.port = <number>this.#s.port;
 		if (callback)
 			callback(this);
 		return true;

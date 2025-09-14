@@ -35,7 +35,7 @@ bun --version
 4. Create an `index.ts` file and add the following code:
 
     ```typescript
-    import toastiebun from "toastiebun"; // v0.4.11
+    import toastiebun from "toastiebun"; // v0.4.12
 
     const app = new toastiebun.server();
 
@@ -54,4 +54,4 @@ bun --version
     ```
 
 6. Open your browser and visit `http://localhost:8000`. You should see `Hello, ToastieBun!` displayed.
-   ![Hello from Toasteibun](../assets/HelloWorld.png)
+   ![Hello from Toasteibun](../assets/HelloWorld-example.png)
