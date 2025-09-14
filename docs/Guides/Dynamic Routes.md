@@ -14,10 +14,10 @@ import toastiebun from "toastiebun";
 
 const app = new toastiebun.server();
 
-app.get("/post/:community/:slug", (req, res) => {
+app.get("/posts/:community/:slug", (req, res) => {
 	res.send({
 		status: "success",
-		post: {
+		posts: {
 			community: req.params.community,
 			slug: req.params.slug,
 		}
@@ -29,6 +29,6 @@ app.listen("::", 8000, () => {
 });
 ```
 
-![Example 1](../assets/DynamicRoutes-example1.png)
+![Example 1](../assets/DynamicRoutes-example.png)
 
 This is great for simple pages that are stored somewhere else and can be accessed by the server however, dynamic routes can also be used to write APIs with a bit more complex structuring.
