@@ -1,4 +1,4 @@
-import { EventEmitter } from "stream";
+import { EventEmitter } from "events";
 import { ServerWebSocket } from "bun";
 import { toastiebun } from "./toastiebun.d";
 
