@@ -11,7 +11,6 @@ export default class request {
 	#parent: server;
 	#method: toastiebun.method;
 	#stale: boolean;
-	#fields: { [field: string]: string };
 	#bunReq: Request;
 	
 	/**
@@ -95,7 +94,9 @@ export default class request {
 		this.#bunReq = req;
 		this.ip = ip;
 		this.baseUrl = this.#bunReq.url;
-		const urlobj = new URL(this.#bunReq.url)
+		const urlobj = new URL(this.#bunReq.url);
+		this.originalUrl = urlobj.toString();
+		this.hostname = urlobj.hostname;
 		this.path = urlobj.pathname;
 		this.#method = <toastiebun.method>this.#bunReq.method;
 		this.params = {};
@@ -119,10 +120,6 @@ export default class request {
 		this.#stale = false;
 		if (this.headers.get("Cache-Control") == 'no-cache')
 			this.#stale = true;
-		this.#fields = {};
-		var url = new URL(req.url);
-		this.originalUrl = url.toString();
-		this.hostname = url.hostname;
 	}
 
 	/**
@@ -190,6 +187,7 @@ export default class request {
 
 	/**
 	 * @TODO write info
+	 * @ignore
 	 */
 	routeTrace() {
 		return this.routeStack.map(r => r.path);
