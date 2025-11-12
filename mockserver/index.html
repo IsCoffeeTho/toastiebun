@@ -1,46 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>ToastiePy</title>
+		<link rel="stylesheet" href="/static/index.css" />
+	</head>
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>ToastieBun</title>
-	<style>
-		body {
-			background-color: #111;
-			color: #fff;
-			font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-		}
+	<body>
+		<h1>ToastieBun</h1>
+		<p>This is an Example server.</p>
 
-		a {
-			color : #88f;
-			text-decoration: none;
-			font-family: 'Courier New', Courier, monospace;
-			transition: text-shadow 0.2s;
-		}
-
-		a:hover {
-			text-shadow: 0px 0px 5px currentColor;
-		}
-	</style>
-</head>
-
-<body>
-	<h1>ToastieBun</h1>
-	<p>This is an Example server.</p>
-
-	<h3>Check out demos</h3>
-	<ul>
-		<li><a href="/file">Text File</a></li>
-		<li><a href="/empty">Empty File</a></li>
-		<li><a href="/redirect">redirect &rarr; redirected</a></li>
-		<li><a href="/long/path">/long/path</a></li>
-		<li><a href="/subserver">Subserver</a></li>
-		<li><a href="/404">404 Handler</a></li>
-	</ul>
-</body>
-
+		<h3>Check out demos</h3>
+		<ul>
+			<li><a href="/file">Text File</a></li>
+			<li><a href="/empty">Empty File</a></li>
+			<li><a href="/fail">Bad File</a></li>
+			<li><a href="/redirect">redirect &rarr; redirected</a></li>
+			<li><a href="/long/path">/long/path</a></li>
+			<li><a href="/form">Form POST request</a></li>
+			<li><a href="/websocket">Websocket Example</a></li>
+			<li><a href="/subserver">Subserver</a></li>
+			<li><a id="rand404" href="/404">404 Handler</a></li>
+		</ul>
+		<script src="/static/rand404.js"></script>
+	</body>
 </html>

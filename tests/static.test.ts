@@ -9,7 +9,7 @@ test("Text", async () => {
 	expect(await (await fetch(`${endpoint}/another-test-route`)).text())
 		.toBe("Success for Test Route again");
 	expect(await (await fetch(`${endpoint}/test-file`)).text())
-		.toBe("This text is from a file");
+		.toBe("This is a text file example for the library toastiebun");
 });
 
 test("JSON", async () => {

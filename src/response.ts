@@ -229,7 +229,6 @@ export default class response {
 
 		this.#cookies.forEach((v, k) => {
 			var cookieString = `${encodeURI(k)}=${encodeURI(`${v.value}`)}`;
-			console.log(k, v);
 			if (v.expires) {
 				cookieString += `; Expires=`;
 				cookieString += `"${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].at(v.expires.getDay())}, `;
@@ -242,7 +241,28 @@ export default class response {
 			}
 			if (v.maxAge != undefined) cookieString += `; Max-Age=${v.maxAge}`;
 			if (v.domain) cookieString += `; Domain=${v.domain}`;
-			if (v.path) cookieString += `; Path=${v.path}`;
+			if (v.sameSite != undefined) {
+				var sameSite = "Strict";
+				switch (v.sameSite) {
+					case false:
+					case "None":
+						sameSite = "None";
+						break;
+					case "Lax":
+						sameSite = "Lax";
+						break;
+					case true:
+					case "Strict":
+					default:
+						sameSite = "Strict";
+						break;
+					
+				}
+				cookieString += `; SameSite=${v.sameSite}`
+			};
+			if (!v.path)
+				v.path = "/";
+			cookieString += `; Path=${v.path}`;
 			if (v.secure) cookieString += `; Secure`;
 			if (v.httpOnly) cookieString += `; HttpOnly`;
 			this.#headers.append("Set-Cookie", cookieString);
