@@ -20,7 +20,7 @@ jobs:
         name: Checkout
       - uses: oven-sh/setup-bun@v2
       - run: bun install
-      - run: bunx typedoc 
+      - run: bun run wiki
       - uses: Andrew-Chen-Wang/github-wiki-action@v4
         name: Wiki Push
         with:
