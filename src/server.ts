@@ -13,7 +13,7 @@ import thispkg from "../package.json";
 export default class server {
 	#routes: toastiebun.handleDescriptor[] = [];
 	#running: boolean = false;
-	#s: Server | null = null;
+	#s: Server<any> | null = null;
 	/** Hostname of the server, once bound */
 	host: string = "";
 	/** Port of the server, once bound */
@@ -138,7 +138,7 @@ export default class server {
 				if (methodRoutes[i].method != "WS")
 					continue;
 				caughtOnce = true;
-				req.upgrade(<Server>this.#s, <toastiebun.websocketHandler>methodRoutes[i].handler);
+				req.upgrade(<Server<any>><unknown>this.#s, <toastiebun.websocketHandler>methodRoutes[i].handler);
 			} else if (methodRoutes[i].handler instanceof server) {
 				var savedPath = req.path;
 				req.path = req.path.slice(methodRoutes[i].path.length);
@@ -203,7 +203,7 @@ export default class server {
 			},
 			websocket: {
 				message(ws, data) {
-					var tws = (<{ ws: websocket }>ws.data).ws;
+					var tws = (<{ ws: websocket }><unknown>ws.data).ws;
 					try {
 						if (typeof data == "string")
 							data = Buffer.from(data);
@@ -215,13 +215,13 @@ export default class server {
 					}
 				},
 				open(ws) {
-					var handle = (<{ handle: toastiebun.websocketHandler }>ws.data).handle;
-					var tws = (<{ ws: websocket }>ws.data).ws;
+					var handle = (<{ handle: toastiebun.websocketHandler }><unknown>ws.data).handle;
+					var tws = (<{ ws: websocket }><unknown>ws.data).ws;
 					tws.baseWS = <ServerWebSocket<unknown>>ws;
 					handle(tws);
 				},
 				close(ws, code, reason) {
-					var tws = (<{ ws: websocket }>ws.data).ws;
+					var tws = (<{ ws: websocket }><unknown>ws.data).ws;
 					try {
 						tws.emit("close", code, reason);
 					}

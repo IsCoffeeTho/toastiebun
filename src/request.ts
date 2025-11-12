@@ -4,6 +4,13 @@ import websocket from "./websocket";
 import response from "./response";
 import server from "./server";
 
+/** @ignore */
+type websocketPass = {
+	ws: websocket,
+	req: request,
+	handle: toastiebun.websocketHandler
+}
+
 /**
  * @hideconstructor
  */
@@ -197,7 +204,7 @@ export default class request {
 	 * @internal
 	 * @ignore
 	 */
-	upgrade(serverToUpgradeOn: Server, handler: toastiebun.websocketHandler) {
+	upgrade(serverToUpgradeOn: Server<websocketPass>, handler: toastiebun.websocketHandler) {
 		var websock = new websocket();
 		serverToUpgradeOn.upgrade(this.#bunReq, {
 			data: {
