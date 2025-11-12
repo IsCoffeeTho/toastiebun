@@ -1,21 +1,21 @@
 {
 	"name": "toastiebun",
-	"version": "0.4.13",
+	"version": "0.4.14",
 	"author": "iscoffeetho <iscoffeetho@gmail.com> (https://github.com/IsCoffeeTho)",
 	"main": "index.ts",
 	"module": "index.ts",
 	"devDependencies": {
 		"bun-types": "latest",
-		"@types/bun": "^1.2.2",
-		"typedoc": "^0.27.7",
+		"@types/bun": "^1.3.2",
+		"typedoc": "^0.28.14",
 		"typedoc-github-wiki-theme": "latest",
 		"typedoc-plugin-markdown": "latest",
 		"typedoc-plugin-merge-modules": "latest",
 		"typedoc-plugin-rename-defaults": "latest",
-		"ws": "^8.18.0"
+		"ws": "^8.18.3"
 	},
 	"peerDependencies": {
-		"typescript": "^5.7.3",
+		"typescript": "^5.9.2",
 		"typedoc": "^0.27.3"
 	},
 	"description": "ToastieBun is an express like bun based http server framework.",

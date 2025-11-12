@@ -24,15 +24,15 @@ export namespace toastiebun {
 	 *
 	 * This regex pattern can be used to identify and validate strings that resemble
 	 * cookie names.
-	 * 
+	 *
 	 * > {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes}
-	 * > 
+	 * >
 	 * > A `<cookie-name>` can contain any US-ASCII characters except for: control characters ([ASCII](https://developer.mozilla.org/en-US/docs/Glossary/ASCII) characters 0 up to 31 and ASCII character 127) or separator characters (space, tab and the characters: `( ) < > @ , ; : \ " / [ ] ? = { }`)
-	 * 
+	 *
 	 * @internal
 	 * @type {RegExp}
 	 */
-	export const cookieNameLike : RegExp = /[_!#$%'*+.^`|~a-zA-Z0-9\-]/g;
+	export const cookieNameLike: RegExp = /[_!#$%'*+.^`|~a-zA-Z0-9\-]/g;
 
 	/**
 	 * Regular expression pattern to match HTTP request paths, with optional wildcard support.
@@ -50,14 +50,14 @@ export namespace toastiebun {
 	/**
 	 * Represents HTTP methods commonly used in web development, including a catch all `"*"` and a `"MIDDLEWARE"` indicator
 	 * to express special handling
-	 * 
+	 *
 	 * The `method` type represents standard HTTP methods as strings, such as:
 	 * - `"GET"`: The HTTP GET method retrieves data from the specified resource.
 	 * - `"POST"`: The HTTP POST method submits data to be processed to a specified resource.
 	 * - `"PUT"`: The HTTP PUT method updates a resource or creates one if it doesn't exist.
 	 * - `"DELETE"`: The HTTP DELETE method deletes a specified resource.
 	 * - `"PATCH"`: The HTTP PATCH method applies partial modifications to a resource.
-	 * 
+	 *
 	 * ## Note for Development
 	 * You may notice the missing `HEAD`, `TRACE`, `CONNECTION` and `OPTIONS` methods. These methods are
 	 * purposely omitted from the Library due to them already being handled
@@ -68,10 +68,10 @@ export namespace toastiebun {
 	/** @ignore */
 	export type HTTPMethod = method | "HEAD" | "TRACE" | "CONNCTION" | "OPTIONS";
 
-	/** 
+	/**
 	 * Simple Function type to be used in the `next()` system.
 	 * @see {@link handlerFunction}
-	*/
+	 */
 	export type nextFn = () => any;
 
 	/**
@@ -92,9 +92,9 @@ export namespace toastiebun {
 
 	/**
 	 * WebSocket Handler Function
-	 * 
+	 *
 	 * A handler function that creates and supplies a websocket to hook on for ws requests.
-	 * 
+	 *
 	 * @param {websocket} ws - The Websocket to hook.
 	 * @returns {void}
 	 */
@@ -102,11 +102,11 @@ export namespace toastiebun {
 
 	/**
 	 * HTTP Handler Catch Descriptor
-	 * 
+	 *
 	 * A handler descriptor is used to describe a path and a {@link handlerFunction}
-	 * 
+	 *
 	 * @ignore
-	 * @see {@link handlerFunction} 
+	 * @see {@link handlerFunction}
 	 */
 	export type catchDescriptor<T> = (path: pathPattern, handler: T) => any;
 
@@ -116,8 +116,8 @@ export namespace toastiebun {
 	 * @internal
 	 */
 	export type route = {
-		path: string,
-		method: catchMethod,
+		path: string;
+		method: catchMethod;
 	};
 
 	/**
@@ -126,7 +126,7 @@ export namespace toastiebun {
 	 * @internal
 	 */
 	export type handleDescriptor = route & {
-		handler: handlerFunction | server | websocketHandler
+		handler: handlerFunction | server | websocketHandler;
 	};
 
 	/**
@@ -137,13 +137,12 @@ export namespace toastiebun {
 	 * 3. Redirection messages (`300` – `399`)
 	 * 4. Client error responses (`400` – `499`)
 	 * 5. Server error responses (`500` – `599`)
-	 * 
+	 *
 	 * ## See Also
 	 * {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status}
 	 * @enum {number}
 	 */
 	export enum HTTPStatus {
-
 		// Informational responses (100–199)
 		CONTINUE = 100,
 		SWITCHING_PROTOCOLS = 101,
@@ -214,40 +213,37 @@ export namespace toastiebun {
 		INSUFFICIENT_STORAGE = 507,
 		LOOP_DETECTED = 508,
 		NOT_EXTENDED = 510,
-		NETWORK_AUTHENTICATION_REQUIRED = 511
+		NETWORK_AUTHENTICATION_REQUIRED = 511,
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	export type serverOptions = {
 		tls?: {
-			key: BunFile,
-			cert: BunFile
-		}
+			key: BunFile;
+			cert: BunFile;
+		};
 	};
-	
+
 	export type cookie = {
-		value: string,
+		value: string;
 	} & cookieOptions;
 
 	export type cookieOptions = {
-		domain?: string,
-		expires?: Date,
-		httpOnly?: boolean,
-		maxAge?: Number,
-		path?: toastiebun.path,
-		secure?: boolean,
-		signed?: boolean,
-		sameSite?: boolean |
-		"strict" | "Strict" |
-		"lax" | "Lax" |
-		"none" | "None"
+		domain?: string;
+		expires?: Date;
+		httpOnly?: boolean;
+		maxAge?: Number;
+		path?: toastiebun.path;
+		secure?: boolean;
+		signed?: boolean;
+		sameSite?: boolean | "Strict" | "Lax" | "None";
 	};
 
 	export interface websocketEvents {
-		"data": [Buffer],
-		"close": [number, string],
-		"error": [Error]
-	};
+		data: [Buffer];
+		close: [number, string];
+		error: [Error];
+	}
 }

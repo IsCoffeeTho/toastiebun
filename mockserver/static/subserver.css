@@ -1,0 +1,7 @@
+@import url('/static/index.css');
+
+:root {
+	--bg : #222;
+	--fg : #fff;
+	--link : #88f;
+}
