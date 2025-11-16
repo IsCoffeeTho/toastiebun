@@ -134,8 +134,8 @@ export default class server {
 			}
 			req.routeStack.push(methodRoutes[i]);
 			continueAfterCatch = false;
-			if (req.headers.has("Upgrade")) {
-				if (methodRoutes[i].method != "WS")
+			if (methodRoutes[i].method == "WS") {
+				if (!req.headers.has("Upgrade"))
 					continue;
 				caughtOnce = true;
 				req.upgrade(<Server<any>><unknown>this.#s, <toastiebun.websocketHandler>methodRoutes[i].handler);
@@ -171,6 +171,7 @@ export default class server {
 		this.#running = true;
 		var parent = this;
 		var tls = this.#opts?.tls ?? {};
+		var defaultCookieOptions = this.#opts?.defaultCookieOptions ?? {};
 
 		// default favicon
 		if (this.#getRoutes("GET", "/favicon.ico").length > 0) {
@@ -189,7 +190,7 @@ export default class server {
 			port: port,
 			async fetch(this, req) {
 				var url = new URL(req.url);
-				var constructedResponse = new response(parent, req);
+				var constructedResponse = new response(parent, req, defaultCookieOptions);
 				var constructedRequest = new request(parent, req, constructedResponse, this.requestIP(req)?.address ?? "");
 				try {
 					await parent.trickleRequest(constructedRequest, constructedResponse, () => { });

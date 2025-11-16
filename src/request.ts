@@ -36,7 +36,7 @@ export default class request {
 	path: string;
 
 	/**
-	 * @TODO write info
+	 * 
 	 */
 	cookies: Map<string, string | boolean>;
 
@@ -52,12 +52,14 @@ export default class request {
 	readonly res: response;
 
 	/**
-	 * Search parameters of the request (if any)
+	 * Path parameters of the request (if any)
 	 * 
 	 * @example
 	 * '/users/:id' -> '/users/a0b1c2d3e4f5g6h7i8j9'
 	 * // would result in a 'params' with:
-	 * `{"id":"a0b1c2d3e4f5g6h7i8j9"}`
+	 * {
+	 * 	"id" : "a0b1c2d3e4f5g6h7i8j9"
+	 * }
 	 */
 	readonly params: { [key: string]: string; };
 

@@ -46,6 +46,201 @@ export namespace toastiebun {
 	 * @type {RegExp}
 	 */
 	export const pathPatternLike: RegExp = /^(([a-zA-Z0-9]|[\/+-_.]|\%[0-9a-fA-F][0-9a-fA-F])+\*{0,1}|\*)$/;
+	
+	export const MIMETypeOfExt = (type: string): string => {
+		switch (type) {
+			case "html":
+			case "htm":
+				return "text/html";
+			case "css":
+			case "style":
+			case "stylesheet":
+				return "text/css";
+			case "txt":
+			case "text":
+				return "text/plain";
+			case "js":
+			case "javascript":
+				return "text/javascript";
+			case "json":
+				return "application/json";
+			case "jpeg":
+			case "jpg":
+				return "image/jpeg";
+			case "png":
+				return "image/png";
+			case "gif":
+				return "image/gif";
+			case "svg":
+				return "image/svg+xml";
+			case "webp":
+				return "image/webp";
+			case "mp3":
+				return "audio/mpeg";
+			case "oga":
+				return "audio/ogg";
+			case "wav":
+				return "audio/wav";
+			case "mp4":
+				return "video/mp4";
+			case "webm":
+				return "video/webm";
+			case "ogv":
+				return "video/ogg";
+			case "xml":
+				return "application/xml";
+			case "atom":
+				return "application/atom+xml";
+			case "xhtml":
+				return "application/xhtml+xml";
+			case "js":
+				return "application/javascript";
+			case "webmanifest":
+				return "application/manifest+json";
+			case "eot":
+				return "application/vnd.ms-fontobject";
+			case "woff":
+				return "application/font-woff";
+			case "woff2":
+				return "application/font-woff2";
+			case "ttf":
+				return "application/x-font-ttf";
+			case "js":
+				return "application/x-javascript";
+			case "pdf":
+				return "application/pdf";
+			case "csv":
+				return "text/csv";
+			case "xml":
+				return "text/xml";
+			case "form":
+				return "application/x-www-form-urlencoded";
+			case "zip":
+				return "application/x-zip-compressed";
+			case "zip":
+				return "application/zip";
+			case "ico":
+				return "image/x-icon";
+			case "swf":
+				return "application/x-shockwave-flash";
+			case "rar":
+				return "application/x-rar-compressed";
+			case "tar":
+				return "application/x-tar";
+			case "":
+			case "bin":
+			case "exe":
+			case "dll":
+			case "class":
+				return "application/octet-stream";
+			case "eml":
+				return "message/rfc822";
+			case "ogx":
+				return "application/ogg";
+			case "avi":
+				return "video/x-msvideo";
+			case "wmv":
+				return "video/x-ms-wmv";
+			case "7z":
+				return "application/x-7z-compressed";
+			case "bz":
+				return "application/x-bzip";
+			case "bz2":
+				return "application/x-bzip2";
+			case "aif":
+			case "aiff":
+			case "aifc":
+				return "audio/x-aiff";
+			case "flac":
+				return "audio/x-flac";
+			case "bmp":
+				return "image/bmp";
+			case "tiff":
+			case "tif":
+				return "image/tiff";
+			case "xls":
+				return "application/vnd.ms-excel";
+			case "doc":
+				return "application/vnd.ms-word";
+			case "ppt":
+				return "application/vnd.ms-powerpoint";
+			case "docx":
+				return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+			case "xlsx":
+				return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+			case "pptx":
+				return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+			case "epub":
+				return "application/epub+zip";
+			case "msi":
+				return "application/x-msi";
+			case "exe":
+				return "application/x-dosexec";
+			case "jar":
+				return "application/x-java-archive";
+			case "pem":
+				return "application/x-pem-file";
+			case "p12":
+			case "pfx":
+				return "application/x-pkcs12";
+			case "p7b":
+			case "spc":
+				return "application/x-pkcs7-certificates";
+			case "p7r":
+				return "application/x-pkcs7-certreqresp";
+			case "woff":
+				return "application/x-font-woff";
+			case "woff2":
+				return "application/x-font-woff2";
+			case "mid":
+			case "midi":
+				return "audio/midi";
+			case "ra":
+				return "audio/vnd.rn-realaudio";
+			case "obj":
+				return "model/obj";
+			case "igs":
+			case "iges":
+				return "model/iges";
+			case "sh":
+				return "application/x-sh";
+			case "csh":
+				return "application/x-csh";
+			case "rb":
+				return "application/x-ruby";
+			case "pl":
+				return "application/x-perl";
+			case "mdb":
+				return "application/x-ms-access";
+			case "exe":
+				return "application/x-ms-dos-executable";
+			case "tar.gz":
+			case "tgz":
+				return "application/x-compressed";
+			case "xz":
+				return "application/x-xz";
+			case "lz":
+				return "application/x-lzip";
+			case "lzma":
+				return "application/x-lzma";
+			case "xar":
+				return "application/x-xar";
+			case "sit":
+				return "application/x-stuffit";
+			case "odt":
+				return "application/vnd.oasis.opendocument.text";
+			case "ods":
+				return "application/vnd.oasis.opendocument.spreadsheet";
+			case "odg":
+				return "application/vnd.oasis.opendocument.drawings";
+			case "odg":
+				return "application/vnd.oasis.opendocument.graphics";
+			case "odc":
+				return "application/vnd.oasis.opendocument.chart";
+			case "odf":
+				return "application/vnd.oasis.opendocument.formula";
+		}
+	}
 
 	/**
 	 * Represents HTTP methods commonly used in web development, including a catch all `"*"` and a `"MIDDLEWARE"` indicator
@@ -224,21 +419,126 @@ export namespace toastiebun {
 			key: BunFile;
 			cert: BunFile;
 		};
+		defaultCookieOptions?: cookieOptions;
 	};
 
 	export type cookie = {
 		value: string;
 	} & cookieOptions;
 
+	/**
+	 * 
+	 */
 	export type cookieOptions = {
+		/**
+		 * Defines the host to which the cookie will be sent.
+		 *
+		 * Only the current domain can be set as the value, or a domain of a higher order unless it is a public suffix.
+		 * Setting the domain will make the cookie available to it, as well as to all its subdomains.
+		 *
+		 * If omitted, the cookie is return only to the host that sent them (i.e., it becomes a "host-only cookie"). this is more restrictive than setting the
+		 * host name, as the cookie is not made available to the subdomains of the host.
+		 *
+		 * Contrary to earlier specifications, leading dots in domain names (`.example.com`) are ignored.
+		 *
+		 * Multiple host/domain values are *not* allowed, but if a domain *is* specified, then subdomains are always include.
+		 * 
+		 * --- 
+		 * {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#domaindomain-value source}
+		 */
 		domain?: string;
+		/**
+		 * Indicates the maximum lifetime of the cookie as a {@link Date}.
+		 *
+		 * If unspecified, the cookie becomes a **session cookie**. A session finishes when the client shuts down, after which the session cookie is removed.
+		 * If both `Expires` and `Max-Age` are set, `Max-Age` has precedence.
+		 * 
+		 * --- 
+		 * {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#expiresdate source}
+		 */
 		expires?: Date;
+		/**
+		 * Forbids JavaScript from accessing the cookie, for example, though the `Document.cookie` property. Note that a cookie that has been created with
+		 * `HttpOnly` will stell be sent with JavaScript initiated requests, for example, when calling `XMLHttpRequest.send()` or `fetch()`. This mitigates
+		 * attacks against cross-site scripting ({@link https://developer.mozilla.org/en-US/docs/Glossary/Cross-site_scripting `XSS`})
+		 * 
+		 * ---
+		 * {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#httponly source}
+		 */
 		httpOnly?: boolean;
+		/**
+		 * Indicates the number of seconds until the cookie expires. A zero or negative number will expire the cookie immediately.
+		 * If both `Expires` and `Max-Age` are set, `Max-Age` has precedence.
+		 * 
+		 * ---
+		 * {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#max-agenumber source}
+		 */
 		maxAge?: Number;
+		/**
+		 * Indicates the path that *must* exist in the requested URL for the browser to send the `Cookie` header.
+		 * If omitted, this attribute defaults to the path component of the request URL.
+		 * For example, if a cookie is set by a request to `https://example.com/docs/Web/HTTP/index.html`, the default path would be `/docs/Web/HTTP/`.
+		 * 
+		 * ---
+		 * {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#pathpath-value source}
+		 */
 		path?: toastiebun.path;
-		secure?: boolean;
-		signed?: boolean;
+		/**
+		 * Controls whether or not a cookie is sent with cross-site requests: that is, requests originating from a different site, including the scheme,
+		 * from the side that set the cookie. This provides some protection against certain cross-site attacks,
+		 * including {@link https://developer.mozilla.org/en-US/docs/Glossary/CSRF cross-site requests forgery (CSRF)} attacks.
+		 * 
+		 * The possible attribute values are:
+		 * ## `Strict` 
+		 * Send the cookie only for requests originating from the same site that set the cookie.
+		 * ## `Lax`
+		 * Send the cookie only for requests originating from the same site that set the cookie, and for
+		 * cross-site requests that meet both of the following criteria:  
+		 * - The request is a top-level navigation: this essentially means that the request causes the URL shown in the browser's address bar to change.
+		 *   - This would exclude, for example, requests made using the {@link https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch `fetch()`} API,
+		 * 	   or requests from subresources from {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/img `<img>`} or
+		 *     {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script `<script>`} elements, or navigations inside
+		 *     {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/iframe `<iframe>`} elements.
+		 *   - It would include requests made when the user clicks a link in the top-level browsing context from one site to another, or an assignment to
+		 *     {@link https://developer.mozilla.org/en-US/docs/Web/API/Document/location `document.location`}, or a
+		 *     {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/form `<form>`} submission.
+		 * - The request uses a {@link https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP safe} method: in particular, this excludes
+		 *   {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST `POST`},
+		 *   {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/PUT `PUT`}, and
+		 *   {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/DELETE `DELETE`}.
+		 * 
+		 * > [!NOTE]
+		 * > **NOTE:** When `Lax` is applied as a default, a more permissive version is used. In this more permissive version, cookies are also included in
+		 * > {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST `POST`} requests, as long as they were set no more than
+		 * > two minutes before the request was made.
+		 * ## `None`
+		 * Send the cookie with both cross-site and same-site requests. the `Secure` attribute must also be sent when using this value.
+		 * 
+		 * --- 
+		 * {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#samesitesamesite-value source}
+		 */
 		sameSite?: boolean | "Strict" | "Lax" | "None";
+		/**
+		 * Indicates that the cookie is sent to the server only when a request is made with the `https:` scheme (except on localhost),
+		 * and therefore is more resistant to {@link https://developer.mozilla.org/en-US/docs/Glossary/MitM man-in-the-middle} attacks.
+		 * > [!NOTE]
+		 * > **NOTE:** Do not assume that `Secure` prevents all access to sensitive information in cookies (session keys, login details, etc.).
+		 * > Cookies with this attribute can still be read/modified either with access to the client's hard disk or from JavaScript if the
+		 * > {@linkcode cookieOptions.httpOnly HttpOnly} cookie attribute is not set.
+		 * > 
+		 * > ```ts
+		 * > res.cookie("secure-cookie", "super-secret-value", {
+		 * > 	secure: true,
+		 * > 	httpOnly: true,
+		 * > }).send("Secured a cookie!");
+		 * > ```
+		 * >
+		 * > Insecure sites (`http:`) cannot set cookies with the `Secure` attribute. The `https:` requirements are ignored when the `Secure` attribute
+		 * > is set by localhost. 
+		 * --- 
+		 * {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#secure source}
+		 */
+		secure?: boolean;
 	};
 
 	export interface websocketEvents {

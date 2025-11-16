@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
 
 app.listen("127.0.0.1", 8000);
 ```
-![Hello from Tostiebun](./docs/assets/HelloWorld.png)
+![Hello from Tostiebun](./docs/assets/HelloWorld-example.png)
 
 ## Development
 ```bash
