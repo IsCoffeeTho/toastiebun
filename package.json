@@ -16,7 +16,7 @@
 		"typedoc-github-wiki-theme": "latest",
 		"typedoc-plugin-markdown": "latest",
 		"typedoc-plugin-merge-modules": "latest",
-		"typedoc-plugin-rename-defaults": "latest",
+		"typedoc-plugin-rename-defaults": "latest"
 	},
 	"description": "ToastieBun is an express like bun based http server framework.",
 	"keywords": [
