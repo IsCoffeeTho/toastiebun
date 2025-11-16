@@ -1,6 +1,5 @@
 import { endpoint } from "./mockserver.test";
 import { expect, test } from "bun:test";
-import WebSocket from "ws";
 
 test("Dynamic Content", async () => {
 	expect(await (await fetch(`${endpoint}/increment`)).text()).toBe("1");
@@ -98,53 +97,4 @@ test("POST", async () => {
 			})
 		).text(),
 	).toBe("Test Data");
-});
-
-test("WebSocket", async () => {
-	var socket = new WebSocket(`${endpoint}/echo-ws`);
-	expect(socket).toBeInstanceOf(WebSocket);
-	await new Promise((res, rej) => {
-		socket.once("open", () => {
-			res(0);
-		});
-		socket.once("error", (err) => {
-			rej(err);
-		});
-		socket.once("close", (c, r) => {
-			rej(r.toString());
-		});
-	});
-	expect(socket.readyState).toBe(WebSocket.OPEN);
-});
-
-test("WebSocket Echo", async () => {
-	var websocket = new WebSocket(`${endpoint}/echo-ws`);
-	websocket.onopen = async () => {
-		try {
-			var awaitMessage = () => {
-				return new Promise<any>((res, rej) => {
-					websocket.onmessage = (event) => {
-						res(event.data);
-					};
-					websocket.onerror = () => {
-						rej();
-					};
-					websocket.onclose = () => {
-						rej("closed");
-					};
-				});
-			};
-			websocket.send("hi");
-			expect(await awaitMessage()).toBe("hi");
-			var randomNumber = (Math.random() * 10 ** 6).toString();
-			websocket.send(randomNumber);
-			expect(await awaitMessage()).toBe(randomNumber);
-			websocket.send("exit");
-			expect(await awaitMessage()).toBe("exit");
-
-			expect(await awaitMessage()).toThrow("closed");
-		} catch (err) {
-			websocket.close();
-		}
-	};
 });

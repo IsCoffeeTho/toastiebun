@@ -15,19 +15,6 @@ const mockserver = new toastie.server()
 	.get("/", (req, res) => {
 		res.send("TEST SERVER");
 	})
-	.get("/async", async (req, res) => {
-		await new Promise((res, rej) => {
-			setTimeout(res, 50);
-		})
-		res.send("waited 50ms before responding");
-	})
-	.websocket("/echo-ws", (ws) => {		
-		ws.on("data", (data) => {
-			ws.send(data);
-			if (data.toString() == "exit")
-				ws.close();
-		})
-	})
 	.get("/test-route", (req, res) => {
 		res.send("Success for Test Route");
 	})
@@ -48,6 +35,27 @@ const mockserver = new toastie.server()
 	.get("/appliance", (req, res) => {
 		res.status(418).send("Short and Stout");
 	})
+	.get("/async", async (req, res) => {
+		await new Promise((res, rej) => {
+			setTimeout(res, 50);
+		})
+		res.send("waited 50ms before responding");
+	})
+	.websocket("/echo-ws-ev", (ws) => {
+		ws.on("data", (data) => {
+			ws.send(data);
+			if (data.toString() == "exit")
+				ws.close();
+		})
+	})
+	.websocket("/echo-ws-rd", async (ws) => {		
+		while (true) {
+			var data = await ws.read();
+			ws.send(data);
+			if (data.toString() == "exit")
+				return ws.close();
+		}
+	})
 	.get("/increment", (req, res) => {
 		res.send(`${++dynamicCounter}`);
 	})
@@ -64,12 +72,11 @@ const mockserver = new toastie.server()
 		res.send(req.params.word)
 	})
 	.get("/cookie/:name/:word", (req, res) => {
-		console.log(req.params.name, req.params.word);
 		res.cookie(req.params.name, req.params.word, {path: "/"})
 			.send(`set ${req.params.name}: ${req.params.word}`);
 	})
 	.get("/cookies", (req, res) => {
-		var cookies = req.cookies.entries().toArray();
+		var cookies = req.cookies.entries();
 		var ret = {};
 		for (var cookie of cookies) {
 			ret[cookie[0]] = cookie[1];
