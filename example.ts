@@ -17,21 +17,6 @@ if (process.argv.length > 3) {
 	_port = parseInt(process.argv[3]);
 }
 
-console.log(
-	new Date().toLocaleString("en-US", {
-		timeZone: "GMT",
-		timeZoneName: "short",
-		hour12: false,
-		weekday: "short",
-		year: "numeric",
-		month: "short",
-		day: "2-digit",
-		hour: "2-digit",
-		minute: "2-digit",
-		second: "2-digit",
-	}),
-);
-
 new toastiebun.server()
 	.get("/", (req, res, next) => {
 		// you can provide an error callback
@@ -53,6 +38,9 @@ new toastiebun.server()
 			if (err) res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
 		});
 	})
+	.get("/error", (req, res) => {
+		throw new Error("Custom Error");
+	})
 	.get("/async", async (req, res) => {
 		await new Promise((res, rej) => {
 			setTimeout(res, 1000);
@@ -73,7 +61,7 @@ new toastiebun.server()
 	})
 	.get("/cookies", (req, res) => {
 		var cookies = req.cookies.entries();
-		var ret = {};
+		var ret: { [_: string]: string | boolean } = {};
 		for (var cookie of cookies) {
 			ret[cookie[0]] = cookie[1];
 		}
@@ -135,6 +123,9 @@ new toastiebun.server()
 	)
 	.get("*", (req, res) => {
 		res.status(404).send(`404 File Not Found\ntimes error occured: ${++_404_count}`);
+	})
+	.error((req, res, err) => {
+		console.log(err);
 	})
 	.listen(_host, _port, server => {
 		console.log(`Hosting server @ ${server.host}:${server.port}`);

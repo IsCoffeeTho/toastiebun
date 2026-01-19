@@ -1,12 +1,17 @@
 import { EventEmitter } from "events";
 import { ServerWebSocket } from "bun";
-import { toastiebun } from "./toastiebun.d";
+
+interface websocketEvents {
+		data: [Buffer];
+		close: [number, string];
+		error: [Error];
+	}
 
 export default class websocket {
 	#ev: EventEmitter;
 	#ws: ServerWebSocket<unknown> | null;
 	constructor() {
-		this.#ev = new EventEmitter();
+		this.#ev = new EventEmitter<websocketEvents>();
 		this.#ws = null;
 	}
 
@@ -14,13 +19,13 @@ export default class websocket {
 		if (!this.#ws) this.#ws = ws;
 	}
 
-	on<ev extends keyof toastiebun.websocketEvents>(event: ev, fn: (...args: toastiebun.websocketEvents[ev]) => any) {
+	on<ev extends keyof websocketEvents>(event: ev, fn: (...args: websocketEvents[ev]) => any) {
 		return this.#ev.on(event, fn);
 	}
-	once<ev extends keyof toastiebun.websocketEvents>(event: ev, fn: (...args: toastiebun.websocketEvents[ev]) => any) {
+	once<ev extends keyof websocketEvents>(event: ev, fn: (...args: websocketEvents[ev]) => any) {
 		return this.#ev.once(event, fn);
 	}
-	emit<ev extends keyof toastiebun.websocketEvents>(event: ev, ...args: toastiebun.websocketEvents[ev]) {
+	emit<ev extends keyof websocketEvents>(event: ev, ...args: websocketEvents[ev]) {
 		return this.#ev.emit(event, ...args);
 	}
 
