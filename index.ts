@@ -1,13 +1,7 @@
-import server from "./src/server";
-import response from "./src/response";
-import request from "./src/request";
-import websocket from "./src/websocket";
+/// <reference path="./src/toastiebun.d.ts" />
 
-const toastiebun = {
-	server,
-	request,
-	response,
-	websocket
-};
+import server from "./src/server";
+
+const toastiebun = {server};
 
 export default toastiebun;

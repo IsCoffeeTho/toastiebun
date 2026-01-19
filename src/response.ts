@@ -1,26 +1,28 @@
 import { BunFile } from "bun";
 import { existsSync, statSync } from "fs";
-import { toastiebun } from "./toastiebun.d";
 import { isReadable } from "stream";
 import server from "./server";
 
 // @ts-ignore // just imports version number
 import thispkg from "../package.json";
+import { cookie, cookieOptions, HTTPStatus, MIMETypeOfExt, pathLike } from "./utils";
+
+export const cookieNameLike: RegExp = /[_!#$%'*+.^`|~a-zA-Z0-9\-]/g;
 
 /**
  * @hideconstructor
  */
 export default class response {
 	#body: any;
-	#status: toastiebun.HTTPStatus;
+	#status: HTTPStatus;
 	#headers: Headers;
 	#contentType: string | null;
 	#sentHeaders: boolean = false;
 	#parent: server;
-	#cookies: Map<string, toastiebun.cookie>;
+	#cookies: Map<string, cookie>;
 	#req: Request;
-	#defaultCookieOptions: toastiebun.cookieOptions;
-	constructor(parent: server, req: Request, defaultCookieOptions: toastiebun.cookieOptions) {
+	#defaultCookieOptions: cookieOptions;
+	constructor(parent: server, req: Request, defaultCookieOptions: cookieOptions) {
 		this.#parent = parent;
 		this.#req = req;
 		this.#status = 200;
@@ -69,10 +71,10 @@ export default class response {
 	/**
 	 * Set a cookie with a value
 	 */
-	cookie(name: string, value: any, options?: toastiebun.cookieOptions) {
+	cookie(name: string, value: any, options?: cookieOptions) {
 		if (this.#sentHeaders) throw response.#InvalidHeaderAccess;
-		if (!name.match(toastiebun.cookieNameLike)) throw new SyntaxError(`cookie name "${name}" has invalid characters.`);
-		options = Object.assign(Object.assign({}, this.#defaultCookieOptions), options)
+		if (!name.match(cookieNameLike)) throw new SyntaxError(`cookie name "${name}" has invalid characters.`);
+		options = Object.assign(Object.assign({}, this.#defaultCookieOptions), options);
 		this.#cookies.set(name, {
 			value,
 			...options,
@@ -82,12 +84,12 @@ export default class response {
 
 	/**
 	 * Remove a cookie
-	 * 
+	 *
 	 * @see {@linkcode response.cookie `res.cookie`}
 	 */
 	clearCookie(name: string) {
 		if (this.#sentHeaders) throw response.#InvalidHeaderAccess;
-		if (!name.match(toastiebun.cookieNameLike)) throw new SyntaxError(`cookie name "${name}" has invalid characters.`);
+		if (!name.match(cookieNameLike)) throw new SyntaxError(`cookie name "${name}" has invalid characters.`);
 		this.#cookies.set(name, {
 			value: "",
 			maxAge: 0,
@@ -98,7 +100,7 @@ export default class response {
 
 	/**
 	 * Forcefully tells the browser not to store a copy locally for caching reasons.
-	 * 
+	 *
 	 * Sets the `Cache-Control` header to `no-store`
 	 */
 	disableCache() {
@@ -109,10 +111,10 @@ export default class response {
 
 	/**
 	 * Sets the HTTP status code of the response.
-	 * 
+	 *
 	 * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status HTTP status codes}
 	 */
-	status(code: toastiebun.HTTPStatus) {
+	status(code: HTTPStatus) {
 		if (this.#sentHeaders) throw response.#InvalidHeaderAccess;
 		this.#status = code;
 		return this;
@@ -128,7 +130,19 @@ export default class response {
 	}
 
 	/**
-	 * 
+	 *
+	 */
+	error(code: number, message: string) {
+		this.status(code).send({
+			error: {
+				code,
+				message,
+			},
+		});
+	}
+
+	/**
+	 *
 	 */
 	send(body: any) {
 		this.end();
@@ -165,7 +179,7 @@ export default class response {
 			var modifiedSince = new Date(<string>this.#req.headers.get("If-Modified-Since"));
 			if (modifiedSince >= lastModified) {
 				this.#body = null;
-				this.#status = toastiebun.HTTPStatus.NOT_MODIFIED;
+				this.#status = HTTPStatus.NOT_MODIFIED;
 			}
 		} else this.#headers.set("Last-Modified", lastModified.toUTCString());
 		return retval;
@@ -177,14 +191,14 @@ export default class response {
 	sendFile(path: string, errorCallback?: (err?: Error) => any): boolean {
 		try {
 			if (this.#sentHeaders) throw response.#InvalidHeaderAccess;
-			if (!toastiebun.pathLike.test(path)) throw new TypeError("path is not toastiebun.pathLike");
+			if (!pathLike.test(path)) throw new TypeError("path is not pathLike");
 			if (!existsSync(path)) throw new Error("ENOENT");
 			var stat = statSync(path);
 			if (!stat.isFile() && !stat.isFIFO()) throw new Error("File must be regular or FIFO");
 			var body = Bun.file(path);
 			this.#body = body;
 			if (body.size == 0 && Math.floor(<number>this.#status / 100) == 2) {
-				this.#status = toastiebun.HTTPStatus.NO_CONTENT;
+				this.#status = HTTPStatus.NO_CONTENT;
 				this.#body = "";
 			}
 			if (this.#contentType == null) this.#contentType = body.type;
@@ -199,10 +213,10 @@ export default class response {
 
 	/**
 	 * Informs the client about the media type of the returned data.
-	 *  
+	 *
 	 */
 	type(type: string) {
-		this.#contentType = toastiebun.MIMETypeOfExt(type) ?? type;
+		this.#contentType = MIMETypeOfExt(type) ?? type;
 		return this;
 	}
 
@@ -210,7 +224,7 @@ export default class response {
 		try {
 			if (this.#sentHeaders) throw response.#InvalidHeaderAccess;
 			this.#headers.set("Location", path);
-			if (this.#status < 300 || this.#status >= 400) this.#status = toastiebun.HTTPStatus.TEMPORARY_REDIRECT;
+			if (this.#status < 300 || this.#status >= 400) this.#status = HTTPStatus.TEMPORARY_REDIRECT;
 			this.#body = "";
 			this.#sentHeaders = true;
 		} catch (err: any) {
@@ -260,13 +274,15 @@ export default class response {
 						sameSite = "Strict";
 						break;
 				}
-				cookieString += `; SameSite=${v.sameSite}`;
+				cookieString += `; SameSite=${sameSite}`;
 			}
 			if (v.path) cookieString += `; Path=${v.path}`;
 			if (v.secure) cookieString += `; Secure`;
 			if (v.httpOnly) cookieString += `; HttpOnly`;
 			this.#headers.append("Set-Cookie", cookieString);
 		});
+
+		this.#headers.set("X-Powered-By", `ToastieBun v${thispkg.version}`);
 
 		return new Response(this.#body, {
 			status: this.#status,
