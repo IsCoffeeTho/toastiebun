@@ -1,5 +1,4 @@
-/// <reference path="d.ts" />
-
+import { toastiebun } from "./toastiebun.ts";
 import { BunFile, Server, ServerWebSocket } from "bun";
 import request from "./request";
 import response from "./response";
@@ -13,17 +12,8 @@ type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 type catchMethod = method | "*" | "MIDDLEWARE" | "WS";
 type nextFn = () => any;
 
-type route = {
-	path: string;
-	method: catchMethod;
-};
-
-type handlerFunction = (req: request, res: response, next: nextFn) => any;
-type errorHandlerFunction = (req: request, res: response, error: any) => any;
-type websocketHandler = (ws: websocket) => void;
-
-type handleDescriptor = route & {
-	handler: handlerFunction | server | websocketHandler;
+type handleDescriptor = toastiebun.route & {
+	handler: toastiebun.handlerFunction | server | toastiebun.websocketHandler;
 };
 
 type serverOptions = {
@@ -36,7 +26,7 @@ type serverOptions = {
 
 export default class server {
 	#routes: handleDescriptor[] = [];
-	#errorHandler?: errorHandlerFunction;
+	#errorHandler?: toastiebun.errorHandlerFunction;
 	#running: boolean = false;
 	#s: Server<any> | null = null;
 	/** Hostname of the server, once bound */
@@ -85,40 +75,40 @@ export default class server {
 		});
 		pathArray.forEach((p, i) => {
 			if (!pathPatternLike.test(p)) throw new TypeError(`path[${i}] is not URILike`);
-			this.#addCatch("MIDDLEWARE", p ?? "/", <server>middleware);
+			this.#addCatch(<toastiebun.method>"MIDDLEWARE", p ?? "/", <server>middleware);
 		});
 		return this;
 	}
 
-	all(path: string, fn: handlerFunction) {
-		this.#addCatch("*", path, fn);
+	all(path: string, fn: toastiebun.handlerFunction) {
+		this.#addCatch(<toastiebun.method>"*", path, fn);
 		return this;
 	}
-	get(path: string, fn: handlerFunction) {
+	get(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("GET", path, fn);
 		return this;
 	}
-	put(path: string, fn: handlerFunction) {
+	put(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("PUT", path, fn);
 		return this;
 	}
-	post(path: string, fn: handlerFunction) {
+	post(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("POST", path, fn);
 		return this;
 	}
-	patch(path: string, fn: handlerFunction) {
+	patch(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("PATCH", path, fn);
 		return this;
 	}
-	delete(path: string, fn: handlerFunction) {
+	delete(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("DELETE", path, fn);
 		return this;
 	}
-	websocket(path: string, fn: websocketHandler) {
-		this.#addCatch("WS", path, fn);
+	websocket(path: string, fn: toastiebun.websocketHandler) {
+		this.#addCatch(<toastiebun.method>"WS", path, fn);
 		return this;
 	}
-	#addCatch(method: catchMethod, path: string, fn: handlerFunction | server | websocketHandler) {
+	#addCatch(method: toastiebun.method, path: string, fn: toastiebun.handlerFunction | server | toastiebun.websocketHandler) {
 		if (!pathPatternLike.test(path)) throw new TypeError("path is not pathPatern");
 		this.#routes.push({
 			method: method,
@@ -127,17 +117,17 @@ export default class server {
 		});
 	}
 
-	error(fn: errorHandlerFunction) {
+	error(fn: toastiebun.errorHandlerFunction) {
 		this.#errorHandler = fn;
 		return this;
 	}
 
 	#getRoutes(method: catchMethod, path: string) {
 		return this.#routes.filter(route => {
-			if (route.method == "MIDDLEWARE") return path == route.path || path.startsWith(route.path.at(-1) != "/" ? `${route.path}/` : route.path);
-			if (route.method == "WS") {
+			if (<string>route.method == "MIDDLEWARE") return path == route.path || path.startsWith(route.path.at(-1) != "/" ? `${route.path}/` : route.path);
+			if (<string>route.method == "WS") {
 				if (method != "GET") return false;
-			} else if (route.method != "*" && route.method != method) return false;
+			} else if (<string>route.method != "*" && route.method != method) return false;
 			if (route.path.at(-1) == "*") return path.startsWith(route.path.slice(0, -1));
 			if (route.path.indexOf(":") != -1) {
 				var master = route.path.split("/");
@@ -176,10 +166,10 @@ export default class server {
 			}
 			req.routeStack.push(methodRoutes[i]);
 			continueAfterCatch = false;
-			if (methodRoutes[i].method == "WS") {
+			if (methodRoutes[i].method == <toastiebun.method>"WS") {
 				if (!req.headers.has("Upgrade")) continue;
 				caughtOnce = true;
-				req.upgrade(<Server<any>>(<unknown>this.#s), <websocketHandler>methodRoutes[i].handler);
+				req.upgrade(<Server<any>>(<unknown>this.#s), <toastiebun.websocketHandler>methodRoutes[i].handler);
 			} else if (methodRoutes[i].handler instanceof server) {
 				var savedPath = req.path;
 				req.path = req.path.slice(methodRoutes[i].path.length);
@@ -189,7 +179,7 @@ export default class server {
 				req.path = savedPath;
 			} else {
 				caughtOnce = true;
-				await (<handlerFunction>methodRoutes[i].handler)(req, res, nextFn);
+				await (<toastiebun.handlerFunction>methodRoutes[i].handler)(req, res, nextFn);
 			}
 			if (!continueAfterCatch) break;
 		}
@@ -219,7 +209,7 @@ export default class server {
 			});
 		}
 		
-		const errorHandler: errorHandlerFunction = this.#errorHandler ?? ((_req, res, err) => {
+		const errorHandler: toastiebun.errorHandlerFunction = this.#errorHandler ?? ((_req, res, err) => {
 			var status = 500;
 			var message = `500 Internal Server Error\nUncaught ${err.name}: ${err.message}`;
 			if (err instanceof ToastiebunError) {
@@ -261,7 +251,7 @@ export default class server {
 					}
 				},
 				open(ws) {
-					var handle = (<{ handle: websocketHandler }>(<unknown>ws.data)).handle;
+					var handle = (<{ handle: toastiebun.websocketHandler }>(<unknown>ws.data)).handle;
 					var tws = (<{ ws: websocket }>(<unknown>ws.data)).ws;
 					tws.baseWS = <ServerWebSocket<unknown>>ws;
 					handle(tws);
