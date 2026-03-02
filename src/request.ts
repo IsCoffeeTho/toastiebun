@@ -1,5 +1,5 @@
 import { Server } from "bun";
-import { toastiebun } from "./toastiebun";
+import { toastiebun } from "./toastiebun.ts";
 import websocket from "./websocket";
 import response from "./response";
 import server from "./server";
@@ -192,6 +192,17 @@ export default class request {
 	 */
 	async json() {
 		return await this.#bunReq.json();
+	}
+	
+	/**
+	 * Returns a byte buffer
+	 * 
+	 * @example
+	 * const body = await req.blob();
+	 * body.length; // amount of bytes
+	 */
+	async blob() {
+		return await this.#bunReq.blob();
 	}
 
 	/**

@@ -9,9 +9,9 @@ const wsendpoint = `ws://${mockhost}:${mockport}`;
 
 var dynamicCounter = 0;
 
-const middleware = new toastie.server();
+const middleware = new toastie.Server();
 
-const mockserver = new toastie.server()
+const mockserver = new toastie.Server()
 	.get("/", (req, res) => {
 		res.send("TEST SERVER");
 	})

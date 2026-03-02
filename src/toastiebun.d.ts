@@ -5,9 +5,10 @@ import server from "./server";
 import request from "./request";
 import response from "./response";
 import websocket from "./websocket";
+import toastiebun from "..";
 
-declare module "toastiebun" {
-	interface ToastiebunError extends Error {
+declare module toastiebun {
+	export interface ToastiebunError extends Error {
 		constructor(status: number, message: string);
 		public status: number
 	};
@@ -27,13 +28,13 @@ declare module "toastiebun" {
 	 * You may notice the missing `HEAD`, `TRACE`, `CONNECTION` and `OPTIONS` methods. These methods are
 	 * purposely omitted from the Library due to them already being handled
 	 */
-	type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+	export type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 	/**
 	 * Simple Function type to be used in the `next()` system.
 	 * @see {@link handlerFunction}
 	 */
-	type nextFn = () => any;
+	export type nextFn = () => any;
 
 	/**
 	 * HTTP Handler Function
@@ -49,12 +50,12 @@ declare module "toastiebun" {
 	 * @see
 	 * {@link server.all}
 	 */
-	type handlerFunction = (req: request, res: response, next: nextFn) => any;
+	export type handlerFunction = (req: request, res: response, next: nextFn) => any;
 
 	/**
 	 *
 	 */
-	type errorHandlerFunction = (req: request, res: response, error: Error) => any;
+	export type errorHandlerFunction = (req: request, res: response, error: Error) => any;
 
 	/**
 	 * WebSocket Handler Function
@@ -64,7 +65,12 @@ declare module "toastiebun" {
 	 * @param {websocket} ws - The Websocket to hook.
 	 * @returns {void}
 	 */
-	type websocketHandler = (ws: websocket) => void;
+	export type websocketHandler = (ws: websocket) => void;
+	
+	export type route = {
+		path: string;
+		method: method;
+	};
 
 	/**
 	 * HTTP response status codes indicate whether a specific HTTP request has been successfully completed. Responses are grouped in five classes:
@@ -79,7 +85,7 @@ declare module "toastiebun" {
 	 * {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status}
 	 * @enum {number}
 	 */
-	enum HTTPStatus {
+	export enum HTTPStatus {
 		// Informational responses (100–199)
 		CONTINUE = 100,
 		SWITCHING_PROTOCOLS = 101,
@@ -156,7 +162,7 @@ declare module "toastiebun" {
 	/**
 	 *
 	 */
-	type serverOptions = {
+	export type serverOptions = {
 		tls?: {
 			key: BunFile;
 			cert: BunFile;
@@ -167,7 +173,7 @@ declare module "toastiebun" {
 	/**
 	 *
 	 */
-	type cookieOptions = {
+	export type cookieOptions = {
 		/**
 		 * Defines the host to which the cookie will be sent.
 		 *
@@ -279,7 +285,7 @@ declare module "toastiebun" {
 		secure?: boolean;
 	};
 
-	interface websocketEvents {
+	export interface websocketEvents {
 		data: [Buffer];
 		close: [number, string];
 		error: [Error];

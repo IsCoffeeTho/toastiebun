@@ -17,7 +17,7 @@ if (process.argv.length > 3) {
 	_port = parseInt(process.argv[3]);
 }
 
-new toastiebun.server()
+new toastiebun.Server()
 	.get("/", (req, res, next) => {
 		// you can provide an error callback
 		const hasServedUser = res.sendStatic(`${__dirname}/mockserver/index.html`, err => {
@@ -111,7 +111,7 @@ new toastiebun.server()
 	})
 	.use(
 		"/sub",
-		new toastiebun.server()
+		new toastiebun.Server()
 			.get("/", (req, res) => {
 				res.sendFile(`${__dirname}/mockserver/subserver.html`, err => {
 					if (err) res.status(404).send(`404 File Not Found\nERR: ${err.message}`);
