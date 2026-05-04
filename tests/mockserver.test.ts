@@ -97,11 +97,27 @@ const mockserver = new toastie.Server()
 		res.send(await req.text());
 	})
 	.use(middleware)
+	.options("/cors/origin", (req, res) => {
+		res.allowOrigin("localhost").send();
+	})
+	.options("/cors/methods", (req, res) => {
+		res.allowMethod("GET").send();
+	})
+	.get("/cors/methods", (req, res) => {
+		res.send("OK!");
+	})
+	.options("/cors/headers", (req, res) => {
+		res.allowHeader("Authorization").send();
+	})
+	.options("*", (req, res) => {
+		res.status(404).send();
+	})
 	.get("*", (req, res) => {
 		res.status(404).send("404");
 	})
 	.error((req, res, err) => {
 		res.status(500).send("Error endpoint");
+		// console.log(err);
 	});
 
 beforeAll(async () => {

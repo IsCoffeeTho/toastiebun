@@ -13,57 +13,57 @@ export const cookieNameLike: RegExp = /[_!#$%'*+.^`|~a-zA-Z0-9\-]/g;
  * @hideconstructor
  */
 export default class response {
-	#body: any;
-	#status: HTTPStatus;
-	#headers: Headers;
-	#contentType: string | null;
-	#sentHeaders: boolean = false;
-	#parent: server;
-	#cookies: Map<string, cookie>;
-	#req: Request;
-	#defaultCookieOptions: cookieOptions;
+	protected body: any;
+	protected statusCode: HTTPStatus;
+	protected headers: Headers;
+	protected contentType: string | null;
+	protected sentHeaders: boolean = false;
+	protected parent: server;
+	protected cookies: Map<string, cookie>;
+	protected req: Request;
+	protected defaultCookieOptions: cookieOptions;
 	constructor(parent: server, req: Request, defaultCookieOptions: cookieOptions) {
-		this.#parent = parent;
-		this.#req = req;
-		this.#status = 200;
-		this.#body = null;
-		this.#cookies = new Map();
-		this.#headers = <Headers>new Headers();
-		this.#contentType = null;
-		this.#defaultCookieOptions = defaultCookieOptions;
+		this.parent = parent;
+		this.req = req;
+		this.statusCode = 200;
+		this.body = null;
+		this.cookies = new Map();
+		this.headers = <Headers>new Headers();
+		this.contentType = null;
+		this.defaultCookieOptions = defaultCookieOptions;
 	}
 
 	/**
 	 * The parent toastiebun server
 	 */
 	get app() {
-		return this.#parent;
+		return this.parent;
 	}
 
 	/**
 	 * Indicates that request has been handled
 	 */
 	get headerSent() {
-		return this.#sentHeaders;
+		return this.sentHeaders;
 	}
 
 	/**
 	 * Retrieve a header that has been added to the response;
 	 */
 	get(field: string) {
-		return this.#headers.get(field);
+		return this.headers.get(field);
 	}
 
 	/**
 	 * Set a header value in the response
 	 */
 	append(field: string, value?: string | string[]) {
-		if (this.#sentHeaders) throw response.#InvalidHeaderAccess;
+		if (this.sentHeaders) throw response.InvalidHeaderAccess;
 		if (field == "Set-Cookie") throw new Error("The Toastiebun module is not allowing you to set a cookie with the append function.");
 		if (!value) value = [""];
 		if (typeof value == "string") value = [value];
 		value.map(v => {
-			this.#headers.append(field, v);
+			this.headers.append(field, v);
 		});
 		return this;
 	}
@@ -72,10 +72,10 @@ export default class response {
 	 * Set a cookie with a value
 	 */
 	cookie(name: string, value: any, options?: cookieOptions) {
-		if (this.#sentHeaders) throw response.#InvalidHeaderAccess;
+		if (this.sentHeaders) throw response.InvalidHeaderAccess;
 		if (!name.match(cookieNameLike)) throw new SyntaxError(`cookie name "${name}" has invalid characters.`);
-		options = Object.assign(Object.assign({}, this.#defaultCookieOptions), options);
-		this.#cookies.set(name, {
+		options = Object.assign(Object.assign({}, this.defaultCookieOptions), options);
+		this.cookies.set(name, {
 			value,
 			...options,
 		});
@@ -88,9 +88,9 @@ export default class response {
 	 * @see {@linkcode response.cookie `res.cookie`}
 	 */
 	clearCookie(name: string) {
-		if (this.#sentHeaders) throw response.#InvalidHeaderAccess;
+		if (this.sentHeaders) throw response.InvalidHeaderAccess;
 		if (!name.match(cookieNameLike)) throw new SyntaxError(`cookie name "${name}" has invalid characters.`);
-		this.#cookies.set(name, {
+		this.cookies.set(name, {
 			value: "",
 			maxAge: 0,
 			path: "/",
@@ -104,8 +104,8 @@ export default class response {
 	 * Sets the `Cache-Control` header to `no-store`
 	 */
 	disableCache() {
-		if (this.#sentHeaders) throw response.#InvalidHeaderAccess;
-		this.#headers.set("Cache-Control", "no-store");
+		if (this.sentHeaders) throw response.InvalidHeaderAccess;
+		this.headers.set("Cache-Control", "no-store");
 		return this;
 	}
 
@@ -115,8 +115,8 @@ export default class response {
 	 * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status HTTP status codes}
 	 */
 	status(code: HTTPStatus) {
-		if (this.#sentHeaders) throw response.#InvalidHeaderAccess;
-		this.#status = code;
+		if (this.sentHeaders) throw response.InvalidHeaderAccess;
+		this.statusCode = code;
 		return this;
 	}
 
@@ -124,8 +124,8 @@ export default class response {
 	 * Marks that the request is finished being processed
 	 */
 	end() {
-		if (this.#sentHeaders) throw response.#InvalidHeaderAccess;
-		this.#sentHeaders = true;
+		if (this.sentHeaders) throw response.InvalidHeaderAccess;
+		this.sentHeaders = true;
 		return true;
 	}
 
@@ -146,22 +146,22 @@ export default class response {
 	 */
 	send(body: any) {
 		this.end();
-		if (this.#body satisfies BunFile) {
-			this.#body = body;
-			if (this.#contentType == null) this.#contentType = (<BunFile>body).type;
+		if (this.body satisfies BunFile) {
+			this.body = body;
+			if (this.contentType == null) this.contentType = (<BunFile>body).type;
 		} else if (isReadable(body)) {
-			this.#body = (<ReadableStream>body).bytes();
+			this.body = (<ReadableStream>body).bytes();
 		} else if (Buffer.isBuffer(body)) {
-			this.#body = body.toString();
+			this.body = body.toString();
 		} else
 			switch (typeof body) {
 				case "object":
-					this.#body = JSON.stringify(body);
-					if (this.#contentType == null) this.#contentType = "application/json";
+					this.body = JSON.stringify(body);
+					if (this.contentType == null) this.contentType = "application/json";
 					break;
 				default:
-					this.#body = `${body}`;
-					if (this.#contentType == null) this.#contentType = "text/plain";
+					this.body = `${body}`;
+					if (this.contentType == null) this.contentType = "text/plain";
 					break;
 			}
 		return true;
@@ -173,15 +173,15 @@ export default class response {
 	sendStatic(path: string, errorCallback?: (err?: Error) => any): boolean {
 		var retval = this.sendFile(path, errorCallback);
 		if (!retval) return false;
-		var lastModified = new Date((<BunFile>this.#body).lastModified);
+		var lastModified = new Date((<BunFile>this.body).lastModified);
 		lastModified.setMilliseconds(0);
-		if (this.#req.headers.has("If-Modified-Since")) {
-			var modifiedSince = new Date(<string>this.#req.headers.get("If-Modified-Since"));
+		if (this.req.headers.has("If-Modified-Since")) {
+			var modifiedSince = new Date(<string>this.req.headers.get("If-Modified-Since"));
 			if (modifiedSince >= lastModified) {
-				this.#body = null;
-				this.#status = HTTPStatus.NOT_MODIFIED;
+				this.body = null;
+				this.statusCode = HTTPStatus.NOT_MODIFIED;
 			}
-		} else this.#headers.set("Last-Modified", lastModified.toUTCString());
+		} else this.headers.set("Last-Modified", lastModified.toUTCString());
 		return retval;
 	}
 
@@ -190,19 +190,19 @@ export default class response {
 	 */
 	sendFile(path: string, errorCallback?: (err?: Error) => any): boolean {
 		try {
-			if (this.#sentHeaders) throw response.#InvalidHeaderAccess;
+			if (this.sentHeaders) throw response.InvalidHeaderAccess;
 			if (!pathLike.test(path)) throw new TypeError("path is not pathLike");
 			if (!existsSync(path)) throw new Error("ENOENT");
 			var stat = statSync(path);
 			if (!stat.isFile() && !stat.isFIFO()) throw new Error("File must be regular or FIFO");
 			var body = Bun.file(path);
-			this.#body = body;
-			if (body.size == 0 && Math.floor(<number>this.#status / 100) == 2) {
-				this.#status = HTTPStatus.NO_CONTENT;
-				this.#body = "";
+			this.body = body;
+			if (body.size == 0 && Math.floor(<number>this.statusCode / 100) == 2) {
+				this.statusCode = HTTPStatus.NO_CONTENT;
+				this.body = "";
 			}
-			if (this.#contentType == null) this.#contentType = body.type;
-			this.#sentHeaders = true;
+			if (this.contentType == null) this.contentType = body.type;
+			this.sentHeaders = true;
 		} catch (err: any) {
 			if (!errorCallback) throw err;
 			errorCallback(<Error>err);
@@ -216,17 +216,17 @@ export default class response {
 	 *
 	 */
 	type(type: string) {
-		this.#contentType = MIMETypeOfExt(type) ?? type;
+		this.contentType = MIMETypeOfExt(type) ?? type;
 		return this;
 	}
 
 	redirect(path: string, errorCallback?: (err?: Error) => any): boolean {
 		try {
-			if (this.#sentHeaders) throw response.#InvalidHeaderAccess;
-			this.#headers.set("Location", path);
-			if (this.#status < 300 || this.#status >= 400) this.#status = HTTPStatus.TEMPORARY_REDIRECT;
-			this.#body = "";
-			this.#sentHeaders = true;
+			if (this.sentHeaders) throw response.InvalidHeaderAccess;
+			this.headers.set("Location", path);
+			if (this.statusCode < 300 || this.statusCode >= 400) this.statusCode = HTTPStatus.TEMPORARY_REDIRECT;
+			this.body = "";
+			this.sentHeaders = true;
 		} catch (err: any) {
 			if (!errorCallback) throw err;
 			errorCallback(<Error>err);
@@ -240,11 +240,11 @@ export default class response {
 	 * @inner
 	 */
 	get asBunResponse() {
-		if ((this.#body satisfies BunFile) && (<BunFile>this.#body).size == 0) this.#body = "";
+		if ((this.body satisfies BunFile) && (<BunFile>this.body).size == 0) this.body = "";
 
-		if (this.#contentType != null) this.#headers.set("Content-Type", this.#contentType);
+		if (this.contentType != null) this.headers.set("Content-Type", this.contentType);
 
-		this.#cookies.forEach((v, k) => {
+		this.cookies.forEach((v, k) => {
 			var cookieString = `${encodeURI(k)}=${encodeURI(`${v.value}`)}`;
 			if (v.expires) {
 				cookieString += `; Expires=`;
@@ -279,16 +279,16 @@ export default class response {
 			if (v.path) cookieString += `; Path=${v.path}`;
 			if (v.secure) cookieString += `; Secure`;
 			if (v.httpOnly) cookieString += `; HttpOnly`;
-			this.#headers.append("Set-Cookie", cookieString);
+			this.headers.append("Set-Cookie", cookieString);
 		});
 
-		this.#headers.set("X-Powered-By", `ToastieBun v${thispkg.version}`);
+		this.headers.set("X-Powered-By", `ToastieBun v${thispkg.version}`);
 
-		return new Response(this.#body, {
-			status: this.#status,
-			headers: this.#headers,
+		return new Response(this.body, {
+			status: this.statusCode,
+			headers: this.headers,
 		});
 	}
 
-	static #InvalidHeaderAccess = new Error("Invalid Header Access, can not modify headers after sending.");
+	static InvalidHeaderAccess = new Error("Invalid Header Access, can not modify headers after sending.");
 }

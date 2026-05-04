@@ -7,8 +7,9 @@ import websocket from "./websocket";
 // @ts-ignore // just imports version number
 import thispkg from "../package.json";
 import { cookieOptions, pathPatternLike, ToastiebunError } from "./utils";
+import optionsResponse from "./optionsResponse.ts";
 
-type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
 type catchMethod = method | "*" | "MIDDLEWARE" | "WS";
 type nextFn = () => any;
 
@@ -20,6 +21,9 @@ type serverOptions = {
 	tls?: {
 		key: BunFile;
 		cert: BunFile;
+	};
+	cors?: {
+		allowedOrigins?: string[]
 	};
 	defaultCookieOptions?: cookieOptions;
 };
@@ -82,6 +86,10 @@ export default class server {
 
 	all(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch(<toastiebun.method>"*", path, fn);
+		return this;
+	}
+	options(path: string, fn: toastiebun.optionsHandlerFunction) {
+		this.#addCatch("OPTIONS", path, fn);
 		return this;
 	}
 	get(path: string, fn: toastiebun.handlerFunction) {
@@ -225,7 +233,7 @@ export default class server {
 			port: port,
 			async fetch(this, req) {
 				var url = new URL(req.url);
-				var constructedResponse = new response(parent, req, defaultCookieOptions);
+				var constructedResponse = req.method == "OPTIONS" ? (new optionsResponse(parent, req, defaultCookieOptions)): (new response(parent, req, defaultCookieOptions));
 				var constructedRequest = new request(parent, req, constructedResponse, this.requestIP(req)?.address ?? "");
 				try {
 					await parent.trickleRequest(constructedRequest, constructedResponse, () => {});
