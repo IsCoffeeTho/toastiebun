@@ -6,15 +6,14 @@ import websocket from "./websocket";
 
 // @ts-ignore // just imports version number
 import thispkg from "../package.json";
-import { cookieOptions, pathPatternLike, ToastiebunError } from "./utils";
-import optionsResponse from "./optionsResponse.ts";
+import { cookieOptions, CORSOptions, method, pathPatternLike, ToastiebunError } from "./utils";
 
-type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
 type catchMethod = method | "*" | "MIDDLEWARE" | "WS";
 type nextFn = () => any;
 
 type handleDescriptor = toastiebun.route & {
-	handler: toastiebun.handlerFunction | server | toastiebun.websocketHandler;
+	handler?: toastiebun.handlerFunction | server | toastiebun.websocketHandler;
+	options?: CORSOptions | null;
 };
 
 type serverOptions = {
@@ -22,9 +21,7 @@ type serverOptions = {
 		key: BunFile;
 		cert: BunFile;
 	};
-	cors?: {
-		allowedOrigins?: string[]
-	};
+	cors?: CORSOptions;
 	defaultCookieOptions?: cookieOptions;
 };
 
@@ -88,10 +85,6 @@ export default class server {
 		this.#addCatch(<toastiebun.method>"*", path, fn);
 		return this;
 	}
-	options(path: string, fn: toastiebun.optionsHandlerFunction) {
-		this.#addCatch("OPTIONS", path, fn);
-		return this;
-	}
 	get(path: string, fn: toastiebun.handlerFunction) {
 		this.#addCatch("GET", path, fn);
 		return this;
@@ -119,10 +112,19 @@ export default class server {
 	#addCatch(method: toastiebun.method, path: string, fn: toastiebun.handlerFunction | server | toastiebun.websocketHandler) {
 		if (!pathPatternLike.test(path)) throw new TypeError("path is not pathPatern");
 		this.#routes.push({
-			method: method,
-			path: path,
+			method,
+			path,
 			handler: fn,
 		});
+	}
+	options(path: string, options: CORSOptions | null) {
+		if (!pathPatternLike.test(path)) throw new TypeError("path is not pathPatern");
+		this.#routes.push({
+			method: "OPTIONS",
+			path,
+			options,
+		});
+		return this;
 	}
 
 	error(fn: toastiebun.errorHandlerFunction) {
@@ -131,11 +133,15 @@ export default class server {
 	}
 
 	#getRoutes(method: catchMethod, path: string) {
+		const METHOD_CHECK = (route: handleDescriptor) => {
+			if (route.method == "OPTIONS" || method == "OPTIONS") return !route.path.endsWith("*");
+			if (<string>route.method == "WS") return method == "GET";
+			if (<string>route.method == "*") return true;
+			return route.method == method;
+		};
 		return this.#routes.filter(route => {
 			if (<string>route.method == "MIDDLEWARE") return path == route.path || path.startsWith(route.path.at(-1) != "/" ? `${route.path}/` : route.path);
-			if (<string>route.method == "WS") {
-				if (method != "GET") return false;
-			} else if (<string>route.method != "*" && route.method != method) return false;
+			if (!METHOD_CHECK(route)) return false;
 			if (route.path.at(-1) == "*") return path.startsWith(route.path.slice(0, -1));
 			if (route.path.indexOf(":") != -1) {
 				var master = route.path.split("/");
@@ -161,9 +167,11 @@ export default class server {
 		};
 		var methodRoutes = this.#getRoutes(<method>req.method, req.path);
 		if (methodRoutes.length == 0) return false;
+		if (this.#opts?.cors) res.options = this.#opts?.cors;
 		for (var i = 0; i < methodRoutes.length; i++) {
-			if (methodRoutes[i].path.indexOf(":") != -1) {
-				var master = methodRoutes[i].path.split("/");
+			let route = <handleDescriptor>methodRoutes[i];
+			if (route.path.indexOf(":") != -1) {
+				var master = route.path.split("/");
 				var candidate = req.path.split("/");
 				if (master.length != candidate.length) return false;
 				for (var idx in master) {
@@ -172,22 +180,42 @@ export default class server {
 					req.params[key.slice(1)] = candidate[idx];
 				}
 			}
-			req.routeStack.push(methodRoutes[i]);
+			req.routeStack.push(route);
 			continueAfterCatch = false;
-			if (methodRoutes[i].method == <toastiebun.method>"WS") {
+			console.log(route.method, req.method);
+			if (route.handler instanceof server) {
+				var savedPath = req.path;
+				req.path = req.path.slice(route.path.length);
+				if (!req.path.startsWith("/")) req.path = "/" + req.path;
+				if (await (<server>(<unknown>route.handler)).trickleRequest(req, res, nextFn)) caughtOnce = true;
+				else continueAfterCatch = true;
+				if (caughtOnce && (<server>(<unknown>route.handler)).#opts) res.options = <CORSOptions>(<server>(<unknown>route.handler)).#opts?.cors;
+				req.path = savedPath;
+			} else if (route.method == "OPTIONS") {
+				res.options = <CORSOptions>route.options;
+				if (req.method == "OPTIONS") {
+					if (!res.headerSent)
+						res.send("");
+				} else continueAfterCatch = true;
+			} else if (req.method == "OPTIONS") {
+				if (!res.options)
+					res.options = {};
+				if (!res.options?.methods)
+					res.options.methods = [];
+				let caughtMethod = route.method;
+				if (<string>caughtMethod == "WS")
+					caughtMethod = "GET";
+				res.options.methods.push(caughtMethod);
+				if (!res.headerSent)
+					res.send("");
+				continueAfterCatch = true;
+			} else if (route.method == <toastiebun.method>"WS") {
 				if (!req.headers.has("Upgrade")) continue;
 				caughtOnce = true;
-				req.upgrade(<Server<any>>(<unknown>this.#s), <toastiebun.websocketHandler>methodRoutes[i].handler);
-			} else if (methodRoutes[i].handler instanceof server) {
-				var savedPath = req.path;
-				req.path = req.path.slice(methodRoutes[i].path.length);
-				if (!req.path.startsWith("/")) req.path = "/" + req.path;
-				if (await (<server>(<unknown>methodRoutes[i].handler)).trickleRequest(req, res, nextFn)) caughtOnce = true;
-				else continueAfterCatch = true;
-				req.path = savedPath;
+				req.upgrade(<Server<any>>(<unknown>this.#s), <toastiebun.websocketHandler>route.handler);
 			} else {
 				caughtOnce = true;
-				await (<toastiebun.handlerFunction>methodRoutes[i].handler)(req, res, nextFn);
+				await (<toastiebun.handlerFunction>route.handler)(req, res, nextFn);
 			}
 			if (!continueAfterCatch) break;
 		}
@@ -216,16 +244,18 @@ export default class server {
 				},
 			});
 		}
-		
-		const errorHandler: toastiebun.errorHandlerFunction = this.#errorHandler ?? ((_req, res, err) => {
-			var status = 500;
-			var message = `500 Internal Server Error\nUncaught ${err.name}: ${err.message}`;
-			if (err instanceof ToastiebunError) {
-				status = err.status;
-				message = err.message;
-			}
-			res.status(status).send(message);
-		});
+
+		const errorHandler: toastiebun.errorHandlerFunction =
+			this.#errorHandler ??
+			((_req, res, err) => {
+				var status = 500;
+				var message = `500 Internal Server Error\nUncaught ${err.name}: ${err.message}`;
+				if (err instanceof ToastiebunError) {
+					status = err.status;
+					message = err.message;
+				}
+				res.status(status).send(message);
+			});
 
 		this.#s = Bun.serve({
 			tls,
@@ -233,7 +263,7 @@ export default class server {
 			port: port,
 			async fetch(this, req) {
 				var url = new URL(req.url);
-				var constructedResponse = req.method == "OPTIONS" ? (new optionsResponse(parent, req, defaultCookieOptions)): (new response(parent, req, defaultCookieOptions));
+				var constructedResponse = new response(parent, req, defaultCookieOptions);
 				var constructedRequest = new request(parent, req, constructedResponse, this.requestIP(req)?.address ?? "");
 				try {
 					await parent.trickleRequest(constructedRequest, constructedResponse, () => {});

@@ -279,6 +279,16 @@ export enum HTTPStatus {
 	NETWORK_AUTHENTICATION_REQUIRED = 511,
 }
 
+export type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
+
+export type CORSOptions = {
+	origins?: string[],
+	allowHeaders?: string[],
+	exposeHeaders?: string[],
+	maxAge?: number,
+	allowCredentials?: boolean,
+};
+
 export type cookieOptions = {
 	domain?: string;
 	expires?: Date;

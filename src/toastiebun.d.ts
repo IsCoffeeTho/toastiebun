@@ -6,6 +6,7 @@ import request from "./request";
 import response from "./response";
 import websocket from "./websocket";
 import toastiebun from "..";
+import { CORSOptions } from "./utils";
 
 declare module toastiebun {
 	export interface ToastiebunError extends Error {
@@ -166,13 +167,14 @@ declare module toastiebun {
 	}
 
 	/**
-	 *
+	 * 
 	 */
 	export type serverOptions = {
 		tls?: {
 			key: BunFile;
 			cert: BunFile;
 		};
+		cors?: CORSOptions;
 		defaultCookieOptions?: cookieOptions;
 	};
 

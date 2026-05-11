@@ -5,7 +5,7 @@ import server from "./server";
 
 // @ts-ignore // just imports version number
 import thispkg from "../package.json";
-import { cookie, cookieOptions, HTTPStatus, MIMETypeOfExt, pathLike } from "./utils";
+import { cookie, cookieOptions, CORSOptions, HTTPStatus, MIMETypeOfExt, pathLike } from "./utils";
 
 export const cookieNameLike: RegExp = /[_!#$%'*+.^`|~a-zA-Z0-9\-]/g;
 
@@ -22,6 +22,7 @@ export default class response {
 	protected cookies: Map<string, cookie>;
 	protected req: Request;
 	protected defaultCookieOptions: cookieOptions;
+	options: (CORSOptions & { methods?: string[] }) | null = null;
 	constructor(parent: server, req: Request, defaultCookieOptions: cookieOptions) {
 		this.parent = parent;
 		this.req = req;
@@ -281,6 +282,23 @@ export default class response {
 			if (v.httpOnly) cookieString += `; HttpOnly`;
 			this.headers.append("Set-Cookie", cookieString);
 		});
+
+		let vary = [];
+
+		if (this.options?.origins) {
+			let origins = this.options.origins;
+			let reqOrigin = this.req.headers.get("Origin") ?? "";
+			if (origins.indexOf(reqOrigin) > -1) this.headers.set("Access-Control-Allow-Origin", reqOrigin);
+			else this.headers.set("Access-Control-Allow-Origin", origins[0]);
+			if (origins.length > 1) vary.push("Origin");
+		}
+		if (this.options?.allowHeaders) this.headers.set("Access-Control-Allow-Headers", this.options.allowHeaders.join(", "));
+		if (this.options?.methods) this.headers.set("Access-Control-Allow-Methods", this.options.methods.join(", "));
+		if (this.options?.exposeHeaders) this.headers.set("Access-Control-Expose-Headers", this.options.exposeHeaders.join(", "));
+		if (this.options?.allowCredentials) this.headers.set("Access-Control-Allow-Credentials", "true");
+		if (this.options?.maxAge) this.headers.set("Access-Control-Max-Age", this.options.maxAge.toString());
+
+		if (vary.length > 0) this.headers.set("Vary", vary.join(", "));
 
 		this.headers.set("X-Powered-By", `ToastieBun v${thispkg.version}`);
 
