@@ -6,6 +6,7 @@ import request from "./request";
 import response from "./response";
 import websocket from "./websocket";
 import toastiebun from "..";
+import { CORSOptions } from "./utils";
 
 declare module toastiebun {
 	export interface ToastiebunError extends Error {
@@ -25,10 +26,10 @@ declare module toastiebun {
 	 * - `"PATCH"`: The HTTP PATCH method applies partial modifications to a resource.
 	 *
 	 * ## Note for Development
-	 * You may notice the missing `HEAD`, `TRACE`, `CONNECTION` and `OPTIONS` methods. These methods are
+	 * You may notice the missing `HEAD`, `TRACE` and `CONNECTION` methods. These methods are
 	 * purposely omitted from the Library due to them already being handled
 	 */
-	export type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+	export type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
 
 	/**
 	 * Simple Function type to be used in the `next()` system.
@@ -51,6 +52,12 @@ declare module toastiebun {
 	 * {@link server.all}
 	 */
 	export type handlerFunction = (req: request, res: response, next: nextFn) => any;
+	
+	/**
+	 * 
+	 * 
+	 */
+	export type optionsHandlerFunction = (req: request, res: optionsResponse, next: nextFn) => any;
 
 	/**
 	 *
@@ -160,13 +167,14 @@ declare module toastiebun {
 	}
 
 	/**
-	 *
+	 * 
 	 */
 	export type serverOptions = {
 		tls?: {
 			key: BunFile;
 			cert: BunFile;
 		};
+		cors?: CORSOptions;
 		defaultCookieOptions?: cookieOptions;
 	};
 

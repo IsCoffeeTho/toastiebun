@@ -29,9 +29,14 @@ class WebSocketTester extends WebSocket {
 }
 
 test("GET WebSocket Endpoint", async () => {
-	var response = await fetch(`${endpoint}/echo-ws-ev`);
-	expect(response.status, `Websocket Endpoint responded as an HTTP endoint`).not.toBeWithin(200, 299);
-	expect(response.status, `Websocket Endpoint falsely upgraded an HTTP request`).not.toBe(101);
+	var response_event_based = await fetch(`${endpoint}/echo-ws-ev`);
+	expect(response_event_based.status, `Websocket Endpoint responded as an HTTP endoint`).not.toBeWithin(200, 299);
+	expect(response_event_based.status, `Websocket Endpoint falsely upgraded an HTTP request`).not.toBe(101);
+	
+	var response_reader_based = await fetch(`${endpoint}/echo-ws-rd`);
+	expect(response_reader_based.status, `Websocket Endpoint responded as an HTTP endoint`).not.toBeWithin(200, 299);
+	expect(response_reader_based.status, `Websocket Endpoint falsely upgraded an HTTP request`).not.toBe(101);
+	
 });
 
 test("WebSocket Event based", async () => {

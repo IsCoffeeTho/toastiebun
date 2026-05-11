@@ -11,7 +11,11 @@ var dynamicCounter = 0;
 
 const middleware = new toastie.Server();
 
-const mockserver = new toastie.Server()
+const mockserver = new toastie.Server({
+	cors: {
+		origins: ["*"],
+	},
+})
 	.get("/", (req, res) => {
 		res.send("TEST SERVER");
 	})
@@ -97,11 +101,59 @@ const mockserver = new toastie.Server()
 		res.send(await req.text());
 	})
 	.use(middleware)
+	.options("/cors/anyOrigin", {
+		origins: ["*"],
+		allowHeaders: ["Content-Type"],
+	})
+	.get("/cors/anyOrigin", (req, res) => {
+		res.send("OK!");
+	})
+	.options("/cors/specificOrigin", {
+		origins: ["http://localhost:3000"],
+		allowHeaders: ["Content-Type"],
+	})
+	.get("/cors/specificOrigin", (req, res) => {
+		res.send("OK!");
+	})
+	.options("/cors/varyOrigin", {
+		origins: ["http://localhost:8000", "http://localhost:3000"],
+		allowHeaders: ["Content-Type"],
+	})
+	.get("/cors/varyOrigin", (req, res) => {
+		res.send("OK!");
+	})
+	.options("/cors/headers", {
+		allowHeaders: ["Content-Type", "Accepts"],
+	})
+	.get("/cors/headers", (req, res) => {
+		res.send("OK!");
+	})
+	.options("/cors/badHeaders", {
+		// nothing
+	})
+	.get("/cors/badHeaders", (req, res) => {
+		res.send("OK!");
+	})
+	// .options is not required to allow "OPTIONS" method for an endpoint
+	.get("/cors/methods", (req, res) => {
+		res.send("OK!");
+	})
+	.post("/cors/methods", (req, res) => {
+		res.send("OK!");
+	})
+	.options("/cors/maxAge", {
+		maxAge: 60 * 60, // 1 hour
+	})
+	.get("/cors/maxAge", (req, res) => {
+		res.send("OK!");
+	})
+	.options("*", null)
 	.get("*", (req, res) => {
 		res.status(404).send("404");
 	})
 	.error((req, res, err) => {
 		res.status(500).send("Error endpoint");
+		// console.log(err);
 	});
 
 beforeAll(async () => {
