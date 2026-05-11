@@ -26,11 +26,10 @@ const app = new toastiebun.server({
 Alternatively, you can configure CORS options for individual routes using the `options` method directly on those routes. For example:
 
 ```typescript
+// This route will send appropriate CORS headers when an OPTIONS request is made to /protected/api.
 app.options("/protected/api", {
 	allowedOrigins: ["http://example.com", "https://api.example.com"],
 });
-
-// This route will send appropriate CORS headers when an OPTIONS request is made to /protected/api.
 ```
 
 ### Complete Example
@@ -44,15 +43,15 @@ const app = new toastiebun.server({
 	},
 });
 
+// Define an OPTIONS route for CORS preflight checks.
+app.options("/protected/api", {
+	allowedOrigins: ["http://example.com", "https://api.example.com"],
+});
+
 // Define a GET route that requires CORS headers.
 app.get("/protected/api", (req, res) => {
 	// Handle the request logic here
 	res.send("Protected API endpoint");
-});
-
-// Define an OPTIONS route for CORS preflight checks.
-app.options("/protected/api", {
-	allowedOrigins: ["http://example.com", "https://api.example.com"],
 });
 
 app.listen("::1", 3000, () => {
@@ -93,15 +92,15 @@ adjust the path definitions in your server configuration:
 For a route that needs to capture a specific parameter (e.g., user ID), you can use a named placeholder like this:
 
 ```typescript
+// Define an OPTIONS route for CORS preflight checks.
+app.options("/users/:userId", {
+	allowedOrigins: ["http://example.com", "https://api.example.com"],
+});
+
 app.get("/users/:userId", (req, res) => {
 	// Handle the request logic here
 	const userId = req.params.userId;
 	res.send(`User with id: ${userId}`);
-});
-
-// Define an OPTIONS route for CORS preflight checks.
-app.options("/users/:userId", {
-	allowedOrigins: ["http://example.com", "https://api.example.com"],
 });
 ```
 
@@ -110,15 +109,15 @@ app.options("/users/:userId", {
 If you want to handle any path that matches a certain pattern, you can use the wildcard character `*`:
 
 ```typescript
+// Define an OPTIONS route for CORS preflight checks.
+app.options("/files/*filename", {
+	allowedOrigins: ["http://example.com", "https://api.example.com"],
+});
+
 app.get("/files/*filename", (req, res) => {
 	// Handle the request logic here
 	const filename = req.params.filename;
 	res.send(`File requested: ${filename}`);
-});
-
-// Define an OPTIONS route for CORS preflight checks.
-app.options("/files/*filename", {
-	allowedOrigins: ["http://example.com", "https://api.example.com"],
 });
 ```
 
@@ -133,6 +132,11 @@ const app = new toastiebun.server({
 	},
 });
 
+// Define an OPTIONS route for CORS preflight checks on /users/:userId.
+app.options("/users/:userId", {
+	allowedOrigins: ["http://example.com", "https://api.example.com"],
+});
+
 // Define a GET route for dynamic paths.
 app.get("/users/:userId", (req, res) => {
 	// Handle the request logic here
@@ -140,21 +144,16 @@ app.get("/users/:userId", (req, res) => {
 	res.send(`User with id: ${userId}`);
 });
 
-// Define an OPTIONS route for CORS preflight checks on /users/:userId.
-app.options("/users/:userId", {
+// Define an OPTIONS route for CORS preflight checks on '/files/*'.
+app.options("/files/*", {
 	allowedOrigins: ["http://example.com", "https://api.example.com"],
 });
 
 // Define a GET route for wildcard paths.
 app.get("/files/*", (req, res) => {
-	
+
 	// Handle the request logic here...
 
-});
-
-// Define an OPTIONS route for CORS preflight checks on '/files/*'.
-app.options("/files/*", {
-	allowedOrigins: ["http://example.com", "https://api.example.com"],
 });
 
 app.listen("127.0.0.1", 3000, () => {

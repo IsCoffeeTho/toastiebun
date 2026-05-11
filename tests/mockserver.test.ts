@@ -153,7 +153,7 @@ const mockserver = new toastie.Server({
 	})
 	.error((req, res, err) => {
 		res.status(500).send("Error endpoint");
-		console.log(err);
+		// console.log(err);
 	});
 
 beforeAll(async () => {

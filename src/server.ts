@@ -134,7 +134,7 @@ export default class server {
 
 	#getRoutes(method: catchMethod, path: string) {
 		const METHOD_CHECK = (route: handleDescriptor) => {
-			if (route.method == "OPTIONS" || method == "OPTIONS") return !route.path.endsWith("*");
+			if (route.method == "OPTIONS" || method == "OPTIONS") return route.path != "*";
 			if (<string>route.method == "WS") return method == "GET";
 			if (<string>route.method == "*") return true;
 			return route.method == method;
@@ -182,7 +182,6 @@ export default class server {
 			}
 			req.routeStack.push(route);
 			continueAfterCatch = false;
-			console.log(route.method, req.method);
 			if (route.handler instanceof server) {
 				var savedPath = req.path;
 				req.path = req.path.slice(route.path.length);
