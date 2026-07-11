@@ -279,7 +279,7 @@ export enum HTTPStatus {
 	NETWORK_AUTHENTICATION_REQUIRED = 511,
 }
 
-export type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
+export type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "QUERY";
 
 export type CORSOptions = {
 	origins?: string[],

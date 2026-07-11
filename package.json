@@ -1,6 +1,6 @@
 {
 	"name": "toastiebun",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"author": "iscoffeetho <iscoffeetho@gmail.com> (https://github.com/IsCoffeeTho)",
 	"main": "index.ts",
 	"module": "index.ts",

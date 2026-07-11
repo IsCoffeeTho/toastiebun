@@ -105,6 +105,10 @@ export default class server {
 		this.#addCatch("DELETE", path, fn);
 		return this;
 	}
+	query(path: string, fn: toastiebun.handlerFunction) {
+		this.#addCatch("QUERY", path, fn);
+		return this;
+	}
 	websocket(path: string, fn: toastiebun.websocketHandler) {
 		this.#addCatch(<toastiebun.method>"WS", path, fn);
 		return this;
