@@ -1,4 +1,4 @@
-import { beforeAll, expect, mock, test } from "bun:test";
+import { beforeAll } from "bun:test";
 import toastie from "..";
 
 const mockhost = "127.0.0.1";

@@ -6,9 +6,9 @@ import websocket from "./websocket";
 
 // @ts-ignore // just imports version number
 import thispkg from "../package.json";
-import { cookieOptions, CORSOptions, method, pathPatternLike, ToastiebunError } from "./utils";
+import { cookieOptions, CORSOptions, pathPatternLike, ToastiebunError } from "./utils";
 
-type catchMethod = method | "*" | "MIDDLEWARE" | "WS";
+type catchMethod = toastiebun.method | "*" | "MIDDLEWARE" | "WS";
 type nextFn = () => any;
 
 type handleDescriptor = toastiebun.route & {
@@ -169,7 +169,7 @@ export default class server {
 		var nextFn: nextFn = () => {
 			continueAfterCatch = true;
 		};
-		var methodRoutes = this.#getRoutes(<method>req.method, req.path);
+		var methodRoutes = this.#getRoutes(<toastiebun.method>req.method, req.path);
 		if (methodRoutes.length == 0) return false;
 		if (this.#opts?.cors) res.options = this.#opts?.cors;
 		for (var i = 0; i < methodRoutes.length; i++) {
