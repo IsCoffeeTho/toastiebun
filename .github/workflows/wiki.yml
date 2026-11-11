@@ -16,13 +16,16 @@ jobs:
     runs-on: ubuntu-latest
     name: Update wiki
     steps:
-      - uses: actions/checkout@v4
-        name: Checkout
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install
-      - run: bun run wiki
-      - uses: Andrew-Chen-Wang/github-wiki-action@v4
-        name: Wiki Push
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install tools and dependancies
+        run: bun install
+      - name: Create Wiki files
+        run: bun run wiki
+      - name: Wiki Push
+        uses: Andrew-Chen-Wang/github-wiki-action@v4
         with:
           path: "./wiki"
           token: ${{ secrets.GITHUB_TOKEN }}
