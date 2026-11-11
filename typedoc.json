@@ -22,7 +22,7 @@
 	"enumMembersFormat": "table",
 	"useCodeBlocks": true,
 	"tableColumnSettings": {
-		"hideDefaults": false,
+		"hideDefaults": false
 	},
 	"sort": [
 		"kind",
