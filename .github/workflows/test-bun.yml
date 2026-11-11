@@ -7,8 +7,18 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install
-      - run: bun run test
-      - run: bunx jsonlint package.json
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install Dependancies
+        run: bun install
+      - name: Lint package.json
+        run: bunx jsonlint package.json
+      - name: Type Checking
+        run: bun check
+      - name: Run Unit-tests
+        run: bun test
+        

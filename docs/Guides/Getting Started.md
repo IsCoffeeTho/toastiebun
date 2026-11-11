@@ -35,7 +35,7 @@ bun --version
 4. Create an `index.ts` file and add the following code:
 
     ```typescript
-    import toastiebun from "toastiebun"; // v0.4.12
+    import toastiebun from "toastiebun"; // v1.1.0
 
     const app = new toastiebun.server();
 

@@ -29,7 +29,7 @@ declare module toastiebun {
 	 * You may notice the missing `HEAD`, `TRACE` and `CONNECTION` methods. These methods are
 	 * purposely omitted from the Library due to them already being handled
 	 */
-	export type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
+	export type method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "QUERY";
 
 	/**
 	 * Simple Function type to be used in the `next()` system.
