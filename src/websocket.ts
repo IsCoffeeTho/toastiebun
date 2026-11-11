@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { ServerWebSocket } from "bun";
+import { type ServerWebSocket } from "bun";
 
 interface websocketEvents {
 		data: [Buffer];

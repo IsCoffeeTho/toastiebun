@@ -1,11 +1,11 @@
-import { BunFile } from "bun";
+import { type BunFile } from "bun";
 import { existsSync, statSync } from "fs";
 import { isReadable } from "stream";
 import server from "./server";
 
 // @ts-ignore // just imports version number
 import thispkg from "../package.json";
-import { cookie, cookieOptions, CORSOptions, HTTPStatus, MIMETypeOfExt, pathLike } from "./utils";
+import { type cookie, type cookieOptions, type CORSOptions, HTTPStatus, MIMETypeOfExt, pathLike } from "./utils";
 
 export const cookieNameLike: RegExp = /[_!#$%'*+.^`|~a-zA-Z0-9\-]/g;
 
@@ -289,7 +289,7 @@ export default class response {
 			let origins = this.options.origins;
 			let reqOrigin = this.req.headers.get("Origin") ?? "";
 			if (origins.indexOf(reqOrigin) > -1) this.headers.set("Access-Control-Allow-Origin", reqOrigin);
-			else this.headers.set("Access-Control-Allow-Origin", origins[0]);
+			else this.headers.set("Access-Control-Allow-Origin", <string>origins[0]);
 			if (origins.length > 1) vary.push("Origin");
 		}
 		if (this.options?.allowHeaders) this.headers.set("Access-Control-Allow-Headers", this.options.allowHeaders.join(", "));

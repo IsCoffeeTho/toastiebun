@@ -15,7 +15,7 @@ jobs:
           bun-version: latest
       - name: Install Dependancies
         run: bun install
-      - name: Lint package.json
+      - name: Link Check "package.json"
         run: bunx jsonlint package.json
       - name: Type Checking
         run: bun check

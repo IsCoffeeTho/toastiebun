@@ -1,12 +1,12 @@
 import { toastiebun } from "./toastiebun.ts";
-import { BunFile, Server, ServerWebSocket } from "bun";
+import { type BunFile, type Server, type ServerWebSocket } from "bun";
 import request from "./request";
 import response from "./response";
 import websocket from "./websocket";
 
 // @ts-ignore // just imports version number
 import thispkg from "../package.json";
-import { cookieOptions, CORSOptions, pathPatternLike, ToastiebunError } from "./utils";
+import { type cookieOptions, type CORSOptions, pathPatternLike, ToastiebunError } from "./utils";
 
 type catchMethod = toastiebun.method | "*" | "MIDDLEWARE" | "WS";
 type nextFn = () => any;
@@ -152,9 +152,9 @@ export default class server {
 				var candidate = path.split("/");
 				if (master.length != candidate.length) return false;
 				for (var idx in master) {
-					var key = master[idx];
+					var key = <string>master[idx];
 					if (key.startsWith(":")) continue;
-					if (key != candidate[idx]) return false;
+					if (key != <string>candidate[idx]) return false;
 				}
 				return true;
 			}
@@ -179,9 +179,9 @@ export default class server {
 				var candidate = req.path.split("/");
 				if (master.length != candidate.length) return false;
 				for (var idx in master) {
-					var key = master[idx];
+					var key = <string>master[idx];
 					if (!key.startsWith(":")) continue;
-					req.params[key.slice(1)] = candidate[idx];
+					req.params[key.slice(1)] = <string>candidate[idx];
 				}
 			}
 			req.routeStack.push(route);

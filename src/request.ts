@@ -1,4 +1,4 @@
-import { Server } from "bun";
+import { type Server } from "bun";
 import { toastiebun } from "./toastiebun.ts";
 import websocket from "./websocket";
 import response from "./response";
